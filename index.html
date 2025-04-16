@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trackside Stopwatch</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header for mode switching -->
+        <header id="mode-header" tabindex="0">1 Driver Mode</header>
+
+        <!-- Data window (dynamic content) -->
+        <section id="data-window">
+            <!-- Content will be injected by JS based on mode -->
+        </section>
+
+        <!-- Button grid -->
+        <div class="button-grid">
+            <button id="lap1" class="lap-btn blue">L1</button>
+            <button id="split1" class="split-btn green">S1</button>
+            <button id="lap2" class="lap-btn blue">L2</button>
+            <button id="split2" class="split-btn green">S2</button>
+            <button id="lap3" class="lap-btn blue">L3</button>
+            <button id="split3" class="split-btn green">S3</button>
+            <button id="lap4" class="lap-btn blue">L4</button>
+            <button id="split4" class="split-btn green">S4</button>
+            <button id="menu-btn" class="menu-btn gray">Menu</button>
+            <button id="ok-btn" class="ok-btn yellow">OK</button>
+        </div>
+
+        <!-- Menu popup (hidden by default) -->
+        <div id="menu-popup" class="popup" style="display:none;">
+            <div class="popup-content">
+                <button id="stop-timing">Stop Timing</button>
+                <button id="reset-timing">Reset Timing</button>
+                <button id="user-guide">User Guide</button>
+            </div>
+        </div>
+        <!-- User Guide Popup Overlay -->
+        <div id="user-guide-popup" class="user-guide-bg" style="display:none;">
+            <div class="user-guide-popup-window">
+                <div class="user-guide-title">Stopwatch User Guide</div>
+                <div class="user-guide-content">
+                    <p><strong>Welcome</strong><br>
+                    Quickly capture lap and split times for 1, 2, or 4 drivers simultaneously. Designed for clarity and ease-of-use.</p>
+                    <p><strong>Modes</strong><br>
+                    Tap header to cycle modes:<br>
+                    - 1 Driver Mode: Detailed timing for one driver.<br>
+                    - 2 Driver Mode: Detailed timing for two drivers.<br>
+                    - 4 Driver Mode: Compact timing view for four drivers.</p>
+                    <p><strong>Buttons</strong><br>
+                    - Lap (L#): Tap to start/end laps. Automatically tracks best lap times.<br>
+                    - Split (S#): Tap mid-lap to record split times.<br>
+                    - Menu Options (tap "Menu")<br>
+                    - Stop Timing: Pauses all timers.<br>
+                    - Reset Timing: Clears all timing data.<br>
+                    - User Guide: Shows this help guide.<br>
+                    - OK Button: Currently inactive (reserved for future use).</p>
+                    <p>Good luck at the track!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
