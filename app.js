@@ -23,6 +23,21 @@ const splitBtns = [
 const menuBtn = document.getElementById('menu-btn');
 const okBtn = document.getElementById('ok-btn');
 
+// --- micro‑interaction helper ---
+function microFeedback() {
+    // Try vibration first
+    const vibrated = navigator.vibrate ? navigator.vibrate(30) : false;
+    // If vibration unavailable (iOS Safari) fall back to a tiny click sound
+    if (!vibrated) {
+        const click = document.getElementById('click-sound');
+        if (click) {
+            click.currentTime = 0;
+            click.play().catch(()=>{}); // ignore auto‑play blocks
+        }
+    }
+}
+
+
 // Mode switching logic
 function getModeName(mode) {
     if (mode === 1) return '1 Driver Mode';
@@ -108,6 +123,11 @@ modeHeader.addEventListener('keydown', (e) => {
 modeHeader.textContent = getModeName(MODES[currentModeIndex]);
 renderDataWindow();
 updateButtonGrid();
+
+// Attach haptic/audio feedback to every Lap & Split button
+document.querySelectorAll('.lap-btn, .split-btn').forEach(btn =>
+    btn.addEventListener('click', microFeedback, { capture: true })
+);
 
 // --- 1 DRIVER MODE STOPWATCH LOGIC ---
 

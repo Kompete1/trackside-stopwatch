@@ -236,3 +236,9 @@ header#mode-header:active, header#mode-header:focus {
         font-size: 1.07rem;
     }
 }
+
+/* -------- micro‑interaction tactile press -------- */
+.button-grid button:active {
+    transform: scale(0.96);
+    transition: transform 70ms;   /* feels like a physical button */
+}
