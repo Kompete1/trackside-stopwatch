@@ -87,6 +87,13 @@ header#mode-header:active, header#mode-header:focus {
 }
 
 /* Color coding for buttons */
+
+/* overall-best lap highlight */
+.purple {
+    color: #9B59B6;
+    font-weight: 700;
+}
+
 .blue {
     background: #007BFF;
     color: #fff;

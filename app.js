@@ -3,6 +3,56 @@ const MODES = [1, 2, 4];
 let currentModeIndex = 0;
 
 const modeHeader = document.getElementById('mode-header');
+
+// --- GLOBAL BEST LAP (for purple highlight) -----------------------------
+let globalBestLapTime = null;       // fastest lap time across all drivers
+let globalBestLapDriverIdx = null;  // 0‑based index (0 = d1, 1 = d2 ...)
+
+function refreshPurpleHighlight() {
+    // Only active in 2‑ & 4‑driver screens
+    if (MODES[currentModeIndex] !== 2 && MODES[currentModeIndex] !== 4) return;
+
+    // Remove any previous purple classes
+    document.querySelectorAll('.best-lap-span').forEach(el =>
+        el.classList.remove('purple')
+    );
+
+    // Apply purple to the span holding the overall fastest lap
+    if (globalBestLapDriverIdx != null) {
+        const el = document.querySelector(`#d${globalBestLapDriverIdx + 1}-best`);
+        if (el) el.classList.add('purple');
+    }
+}
+
+function recomputeGlobalBest2Driver() {
+    const drivers = [timer2a, timer2b];
+    globalBestLapTime = null;
+    globalBestLapDriverIdx = null;
+
+    drivers.forEach((t, idx) => {
+        if (t.bestLapTime != null &&
+            (globalBestLapTime == null || t.bestLapTime < globalBestLapTime)) {
+            globalBestLapTime = t.bestLapTime;
+            globalBestLapDriverIdx = idx;
+        }
+    });
+    refreshPurpleHighlight();
+}
+
+function recomputeGlobalBest4Driver() {
+    globalBestLapTime = null;
+    globalBestLapDriverIdx = null;
+
+    timer4.forEach((t, idx) => {
+        if (t.bestLapTime != null &&
+            (globalBestLapTime == null || t.bestLapTime < globalBestLapTime)) {
+            globalBestLapTime = t.bestLapTime;
+            globalBestLapDriverIdx = idx;
+        }
+    });
+    refreshPurpleHighlight();
+}
+
 const dataWindow = document.getElementById('data-window');
 const buttonGrid = document.querySelector('.button-grid');
 const menuPopup = document.getElementById('menu-popup');
@@ -61,34 +111,34 @@ function renderDataWindow() {
         html = `
             <div><strong>Driver A:</strong></div>
             <div>&nbsp;&nbsp;Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
-            <div>&nbsp;&nbsp;Best: <span id="d1-best">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
+            <div>&nbsp;&nbsp;Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split">--.--</span>]</div>
             <br>
             <div><strong>Driver B:</strong></div>
             <div>&nbsp;&nbsp;Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
-            <div>&nbsp;&nbsp;Best: <span id="d2-best">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
+            <div>&nbsp;&nbsp;Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split">--.--</span>]</div>
         `;
     } else if (mode === 4) {
         html = `
             <div class="driver-block">
                 <div><strong>Driver A:</strong> Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
-                <div class="driver-sub">Diff: <span id="d1-diff">+00.00</span> &nbsp; Best: <span id="d1-best">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
+                <div class="driver-sub">Diff: <span id="d1-diff">+00.00</span> &nbsp; Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver B:</strong> Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
-                <div class="driver-sub">Diff: <span id="d2-diff">+00.00</span> &nbsp; Best: <span id="d2-best">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
+                <div class="driver-sub">Diff: <span id="d2-diff">+00.00</span> &nbsp; Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver C:</strong> Time: <span id="d3-time">00:00.00</span> (Lap <span id="d3-lap">#1</span>)</div>
-                <div class="driver-sub">Diff: <span id="d3-diff">+00.00</span> &nbsp; Best: <span id="d3-best">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
+                <div class="driver-sub">Diff: <span id="d3-diff">+00.00</span> &nbsp; Best: <span id="d3-best" class="best-lap-span">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d3-split-count">(0)</span> <span id="d3-split">--.--</span> [<span id="d3-best-split">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver D:</strong> Time: <span id="d4-time">00:00.00</span> (Lap <span id="d4-lap">#1</span>)</div>
-                <div class="driver-sub">Diff: <span id="d4-diff">+00.00</span> &nbsp; Best: <span id="d4-best">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
+                <div class="driver-sub">Diff: <span id="d4-diff">+00.00</span> &nbsp; Best: <span id="d4-best" class="best-lap-span">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d4-split-count">(0)</span> <span id="d4-split">--.--</span> [<span id="d4-best-split">--.--</span>]</div>
             </div>
         `;
@@ -235,6 +285,7 @@ function reset2DriverTimer() {
     timer2a = createTimerState();
     timer2b = createTimerState();
     update2DriverDataWindow();
+    recomputeGlobalBest2Driver();
 }
 
 function lap2Driver(timer) {
@@ -253,6 +304,7 @@ function lap2Driver(timer) {
         timer.lastSplit = null;
         timer.bestSplit = null;
         update2DriverDataWindow();
+        recomputeGlobalBest2Driver();
     } else {
         // End current lap
         const lapTime = Date.now() - timer.startTimestamp + timer.elapsed;
@@ -270,6 +322,7 @@ function lap2Driver(timer) {
         timer.splitCount = 0;
         timer.lastSplit = null;
         update2DriverDataWindow();
+        recomputeGlobalBest2Driver();
     }
 }
 
@@ -374,6 +427,7 @@ function lap4Driver(idx) {
         t.lastSplit = null;
         t.bestSplit = null;
         update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
     } else {
         // End current lap
         const lapTime = Date.now() - t.startTimestamp + t.elapsed;
@@ -391,6 +445,7 @@ function lap4Driver(idx) {
         t.splitCount = 0;
         t.lastSplit = null;
         update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
     }
 }
 
@@ -405,12 +460,14 @@ function split4Driver(idx) {
         t.bestSplit = splitTime;
     }
     update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
 }
 
 
 function tick4Driver() {
     if (MODES[currentModeIndex] !== 4) return;
     update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
 }
 
 function start4DriverTimer(idx) {
@@ -436,6 +493,8 @@ function reset4DriverTimers() {
     for (let i = 0; i < 4; i++) stop4DriverTimer(i);
     timer4 = [createTimerState(), createTimerState(), createTimerState(), createTimerState()];
     update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
+    recomputeGlobalBest4Driver();
 }
 
 function lap4Driver(idx) {
@@ -455,6 +514,7 @@ function lap4Driver(idx) {
         t.lastSplit = null;
         t.bestSplit = null;
         update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
     } else {
         // End current lap
         const lapTime = Date.now() - t.startTimestamp + t.elapsed;
@@ -472,6 +532,7 @@ function lap4Driver(idx) {
         t.splitCount = 0;
         t.lastSplit = null;
         update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
     }
 }
 
@@ -486,6 +547,7 @@ function split4Driver(idx) {
         t.bestSplit = splitTime;
     }
     update4DriverDataWindow();
+        recomputeGlobalBest4Driver();
 }
 
 // L1/S1, L2/S2, L3/S3, L4/S4 for 4 Driver Mode
