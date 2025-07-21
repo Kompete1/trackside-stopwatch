@@ -173,22 +173,22 @@ function renderDataWindow() {
         html = `
             <div class="driver-block">
                 <div><strong>Driver A:</strong> Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
-                <div class="driver-sub">Last: <span id="d1-last">--:--.--</span> (Lap <span id="d1-last-lap">#0</span>) &nbsp; Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
+                <div class="driver-sub">Last: <span id="d1-last">--:--.--</span> &nbsp; Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver B:</strong> Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
-                <div class="driver-sub">Last: <span id="d2-last">--:--.--</span> (Lap <span id="d2-last-lap">#0</span>) &nbsp; Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
+                <div class="driver-sub">Last: <span id="d2-last">--:--.--</span> &nbsp; Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver C:</strong> Time: <span id="d3-time">00:00.00</span> (Lap <span id="d3-lap">#1</span>)</div>
-                <div class="driver-sub">Last: <span id="d3-last">--:--.--</span> (Lap <span id="d3-last-lap">#0</span>) &nbsp; Best: <span id="d3-best" class="best-lap-span">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
+                <div class="driver-sub">Last: <span id="d3-last">--:--.--</span> &nbsp; Best: <span id="d3-best" class="best-lap-span">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d3-split-count">(0)</span> <span id="d3-split">--.--</span> [<span id="d3-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-block">
                 <div><strong>Driver D:</strong> Time: <span id="d4-time">00:00.00</span> (Lap <span id="d4-lap">#1</span>)</div>
-                <div class="driver-sub">Last: <span id="d4-last">--:--.--</span> (Lap <span id="d4-last-lap">#0</span>) &nbsp; Best: <span id="d4-best" class="best-lap-span">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
+                <div class="driver-sub">Last: <span id="d4-last">--:--.--</span> &nbsp; Best: <span id="d4-best" class="best-lap-span">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d4-split-count">(0)</span> <span id="d4-split">--.--</span> [<span id="d4-best-split" class="best-split-span">--.--</span>]</div>
             </div>
         `;
@@ -431,14 +431,10 @@ function update4DriverDataWindow() {
         if (document.getElementById(prefix + 'time')) {
             document.getElementById(prefix + 'time').textContent = formatTime(t.running ? Date.now() - t.startTimestamp + t.elapsed : t.elapsed);
         }
-        // Last lap
+        // Last lap (time only)
         if (document.getElementById(prefix + 'last')) {
             document.getElementById(prefix + 'last').textContent =
                 t.lastLapTime != null ? formatTime(t.lastLapTime) : '--:--.--';
-        }
-        if (document.getElementById(prefix + 'last-lap')) {
-            const lastLapNum = t.lapNum > 1 ? t.lapNum - 1 : 0;
-            document.getElementById(prefix + 'last-lap').textContent = `#${lastLapNum}`;
         }
         // Best lap
         if (document.getElementById(prefix + 'best')) {
