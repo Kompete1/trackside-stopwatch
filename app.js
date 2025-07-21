@@ -161,11 +161,13 @@ function renderDataWindow() {
         html = `
             <div><strong>Driver A:</strong></div>
             <div>&nbsp;&nbsp;Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
+            <div>&nbsp;&nbsp;Last: <span id="d1-last">--:--.--</span> (Lap <span id="d1-last-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
             <br>
             <div><strong>Driver B:</strong></div>
             <div>&nbsp;&nbsp;Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
+            <div>&nbsp;&nbsp;Last: <span id="d2-last">--:--.--</span> (Lap <span id="d2-last-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
         `;
@@ -287,6 +289,15 @@ function update2DriverDataWindow() {
     if (document.getElementById('d1-time')) {
         document.getElementById('d1-time').textContent = formatTime(timer2a.running ? Date.now() - timer2a.startTimestamp + timer2a.elapsed : timer2a.elapsed);
         document.getElementById('d1-lap').textContent = `#${timer2a.lapNum}`;
+        // Last lap
+        if (document.getElementById('d1-last')) {
+            document.getElementById('d1-last').textContent =
+                timer2a.lastLapTime != null ? formatTime(timer2a.lastLapTime) : '--:--.--';
+        }
+        if (document.getElementById('d1-last-lap')) {
+            const last = timer2a.lapNum > 1 ? timer2a.lapNum - 1 : 0;
+            document.getElementById('d1-last-lap').textContent = `#${last}`;
+        }
         document.getElementById('d1-best').textContent = timer2a.bestLapTime != null ? formatTime(timer2a.bestLapTime) : '--:--.--';
         document.getElementById('d1-best-lap').textContent = `#${timer2a.bestLapNum || 0}`;
         document.getElementById('d1-split-count').textContent = `(${timer2a.splitCount})`;
@@ -299,6 +310,15 @@ function update2DriverDataWindow() {
         document.getElementById('d2-lap').textContent = `#${timer2b.lapNum}`;
         document.getElementById('d2-best').textContent = timer2b.bestLapTime != null ? formatTime(timer2b.bestLapTime) : '--:--.--';
         document.getElementById('d2-best-lap').textContent = `#${timer2b.bestLapNum || 0}`;
+        // Last lap
+        if (document.getElementById('d2-last')) {
+            document.getElementById('d2-last').textContent =
+                timer2b.lastLapTime != null ? formatTime(timer2b.lastLapTime) : '--:--.--';
+        }
+        if (document.getElementById('d2-last-lap')) {
+            const last = timer2b.lapNum > 1 ? timer2b.lapNum - 1 : 0;
+            document.getElementById('d2-last-lap').textContent = `#${last}`;
+        }
         document.getElementById('d2-split-count').textContent = `(${timer2b.splitCount})`;
         document.getElementById('d2-split').textContent = timer2b.lastSplit != null ? (timer2b.lastSplit/1000).toFixed(2) : '--.--';
         document.getElementById('d2-best-split').textContent = timer2b.bestSplit != null ? (timer2b.bestSplit/1000).toFixed(2) : '--.--';
