@@ -94,6 +94,16 @@ header#mode-header:active, header#mode-header:focus {
     font-weight: 700;
 }
 
+/* per-driver LAST-lap feedback  ---------------------------- */
+.greenlap {
+    color: #2ECC71;   /* green = faster than personal best */
+    font-weight: 700;
+}
+.yellowlap {
+    color: #F1C40F;   /* yellow = slower than personal best */
+    font-weight: 700;
+}
+
 .blue {
     background: #007BFF;
     color: #fff;

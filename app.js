@@ -283,6 +283,18 @@ function formatTime(ms) {
     return `${m}:${s.toString().padStart(2,'0')}.${cs.toString().padStart(2,'0')}`;
 }
 
+/* ---- per-driver LAST-lap colour helper ------------------- */
+function applyLastLapColor(driverIdx, lapTime, prevBest) {
+    const el = document.getElementById(`d${driverIdx}-last`);
+    if (!el) return;
+    el.classList.remove('greenlap', 'yellowlap');
+    if (prevBest == null || lapTime < prevBest) {
+        el.classList.add('greenlap');   // faster  ⇒ green
+    } else {
+        el.classList.add('yellowlap');  // slower  ⇒ yellow
+    }
+}
+
 // --- 2 DRIVER MODE DATA WINDOW UPDATE ---
 function update2DriverDataWindow() {
     // Driver A
@@ -380,12 +392,14 @@ function lap2Driver(timer) {
     } else {
         // End current lap
         const lapTime = Date.now() - timer.startTimestamp + timer.elapsed;
+        const prevBest = timer.bestLapTime;          // NEW
         timer.laps.push({ time: lapTime, lapNum: timer.lapNum });
         timer.lastLapTime = lapTime;
         if (timer.bestLapTime == null || lapTime < timer.bestLapTime) {
             timer.bestLapTime = lapTime;
             timer.bestLapNum = timer.lapNum;
         }
+        applyLastLapColor(timer === timer2a ? 1 : 2, lapTime, prevBest); // NEW
         timer.diff = timer.bestLapTime != null ? lapTime - timer.bestLapTime : 0;
         timer.lapNum++;
         // Reset timer for next lap
@@ -502,6 +516,8 @@ function lap4Driver(idx) {
         const lapTime = Date.now() - t.startTimestamp + t.elapsed;
         t.laps.push({ time: lapTime, lapNum: t.lapNum });
         t.lastLapTime = lapTime;
+        const prevBest = t.bestLapTime;               //  NEW
+        applyLastLapColor(idx + 1, lapTime, prevBest); //  NEW
         if (t.bestLapTime == null || lapTime < t.bestLapTime) {
             t.bestLapTime = lapTime;
             t.bestLapNum = t.lapNum;
@@ -591,6 +607,8 @@ function lap4Driver(idx) {
         const lapTime = Date.now() - t.startTimestamp + t.elapsed;
         t.laps.push({ time: lapTime, lapNum: t.lapNum });
         t.lastLapTime = lapTime;
+        const prevBest = t.bestLapTime;               //  NEW
+        applyLastLapColor(idx + 1, lapTime, prevBest); //  NEW
         if (t.bestLapTime == null || lapTime < t.bestLapTime) {
             t.bestLapTime = lapTime;
             t.bestLapNum = t.lapNum;
@@ -728,23 +746,27 @@ lapBtns[0].addEventListener('click', () => {
         timer1.bestSplit = null;
         update1DriverDataWindow();
     } else {
-        // End current lap
-        const lapTime = Date.now() - timer1.startTimestamp + timer1.elapsed;
-        timer1.laps.push({ time: lapTime, lapNum: timer1.lapNum });
-        timer1.lastLapTime = lapTime;
-        // Best lap logic
-        if (timer1.bestLapTime == null || lapTime < timer1.bestLapTime) {
-            timer1.bestLapTime = lapTime;
-            timer1.bestLapNum = timer1.lapNum;
-        }
-        timer1.diff = timer1.bestLapTime != null ? lapTime - timer1.bestLapTime : 0;
-        timer1.lapNum++;
-        // Reset timer for next lap
-        timer1.elapsed = 0;
-        timer1.startTimestamp = Date.now();
-        timer1.splitCount = 0;
-        timer1.lastSplit = null;
-        update1DriverDataWindow();
+        // End current lap  -----------------------------------------
+const lapTime  = Date.now() - timer1.startTimestamp + timer1.elapsed;
+const prevBest = timer1.bestLapTime;          // << NEW: snapshot PB
+timer1.laps.push({ time: lapTime, lapNum: timer1.lapNum });
+timer1.lastLapTime = lapTime;
+// Best-lap logic (existing)
+if (timer1.bestLapTime == null || lapTime < timer1.bestLapTime) {
+    timer1.bestLapTime = lapTime;
+    timer1.bestLapNum  = timer1.lapNum;
+}
+// Diff (existing)
+timer1.diff = timer1.bestLapTime != null ? lapTime - timer1.bestLapTime : 0;
+// Colour feedback  --------- NEW
+applyLastLapColor(1, lapTime, prevBest);
+// Lap ++ and reset clock for next lap (existing lines)
+timer1.lapNum++;
+timer1.elapsed        = 0;
+timer1.startTimestamp = Date.now();
+timer1.splitCount     = 0;
+timer1.lastSplit      = null;
+update1DriverDataWindow();
     }
 });
 
