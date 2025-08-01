@@ -123,18 +123,15 @@ const splitBtns = [
 const menuBtn = document.getElementById('menu-btn');
 const okBtn = document.getElementById('ok-btn');
 
-// --- micro‑interaction helper ---
+// --- micro-interaction helper (v2) ---
 function microFeedback() {
-    // Try vibration first
-    const vibrated = navigator.vibrate ? navigator.vibrate(30) : false;
-    // If vibration unavailable (iOS Safari) fall back to a tiny click sound
-    if (!vibrated) {
-        const click = document.getElementById('click-sound');
-        if (click) {
-            click.currentTime = 0;
-            click.play().catch(()=>{}); // ignore auto‑play blocks
-        }
-    }
+    /* 1. Haptic kick-back (silently fails where unsupported) */
+    if (navigator.vibrate) navigator.vibrate(30);
+  
+    /* 2. Always play the 50 ms click */
+    const snd = new Audio('public/click.mp3');
+    snd.volume = 1;
+    snd.play().catch(() => {});   // ignore autoplay warnings
 }
 
 
@@ -196,6 +193,7 @@ function renderDataWindow() {
         `;
     }
     dataWindow.innerHTML = html;
+    wireClickSound();
 }
 
 function updateButtonGrid() {
@@ -205,6 +203,7 @@ function updateButtonGrid() {
         lapBtns[i].style.display = (i < mode) ? '' : 'none';
         splitBtns[i].style.display = (i < mode) ? '' : 'none';
     }
+    wireClickSound();
 }
 
 function switchMode() {
@@ -220,6 +219,22 @@ modeHeader.addEventListener('keydown', (e) => {
         switchMode();
     }
 });
+
+// 🔊  Attach click-sound to every interactive control
+function wireClickSound() {
+  const selectors = [
+    '.lap-btn', '.split-btn',                 // timing buttons
+    '#menu-btn', '#ok-btn',                   // grid extras
+    '#mode-header',                           // header tap
+    '#menu-popup button',                     // popup items
+  ];
+  selectors.forEach(sel =>
+    document.querySelectorAll(sel).forEach(el => {
+      el.removeEventListener('click', microFeedback);   // avoid duplicates
+      el.addEventListener('click', microFeedback, { passive: true });
+    })
+  );
+}
 
 // Initial render
 modeHeader.textContent = getModeName(MODES[currentModeIndex]);
@@ -489,7 +504,8 @@ function update4DriverDataWindow() {
         if (document.getElementById(prefix + 'best-split')) {
             document.getElementById(prefix + 'best-split').textContent = t.bestSplit != null ? (t.bestSplit/1000).toFixed(2) : '--.--';
         }
-    }
+}
+wireClickSound();
 }
 
 function lap4Driver(idx) {
