@@ -5,7 +5,8 @@ const URLS_TO_CACHE = [
   '/index.html',
   '/styles.css',
   '/app.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/public/click.mp3',
 ];
 
 self.addEventListener('install', event => {
