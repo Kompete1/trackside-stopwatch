@@ -45,6 +45,44 @@ function refreshPurpleHighlight() {
     }
 }
 
+// --- Update active/inactive states of Lap/Split buttons based on mode ---
+function refreshButtonStates() {
+  const mode = MODES[currentModeIndex]; // 1, 2, or 4
+  const activePairs = (mode === 1) ? 1 : (mode === 2 ? 2 : 4);
+  [0, 1, 2, 3].forEach(i => {
+    const lap = lapBtns[i], sp = splitBtns[i];
+    if (!lap || !sp) return;
+    if (i < activePairs) {
+      lap.classList.remove('inactive');
+      sp.classList.remove('inactive');
+    } else {
+      lap.classList.add('inactive');
+      sp.classList.add('inactive');
+    }
+  });
+}
+
+// Promote mode if needed when tapping a Lap button (L2/L3/L4)
+function maybeJumpModeForLap(idx /* 0..3 for L1..L4 */) {
+  // idx=1 needs 2-driver; idx=2 or 3 needs 4-driver.
+  if (idx === 1 && MODES[currentModeIndex] !== 2) {
+    currentModeIndex = 1; // MODES[1] === 2
+    modeHeader.textContent = getModeName(MODES[currentModeIndex]);
+    onModeSwitch();
+    // After DOM updates, re-click the same button to continue normal logic
+    setTimeout(() => lapBtns[idx].click(), 0);
+    return true;
+  }
+  if ((idx === 2 || idx === 3) && MODES[currentModeIndex] !== 4) {
+    currentModeIndex = 2; // MODES[2] === 4
+    modeHeader.textContent = getModeName(MODES[currentModeIndex]);
+    onModeSwitch();
+    setTimeout(() => lapBtns[idx].click(), 0);
+    return true;
+  }
+  return false;
+}
+
 function recomputeGlobalBest2Driver() {
     const drivers = [timer2a, timer2b];
     globalBestLapTime = null;
@@ -197,12 +235,15 @@ function renderDataWindow() {
 }
 
 function updateButtonGrid() {
-    const mode = MODES[currentModeIndex];
-    // Enable/disable lap/split buttons according to mode
-    for (let i = 0; i < 4; i++) {
-        lapBtns[i].style.display = (i < mode) ? '' : 'none';
-        splitBtns[i].style.display = (i < mode) ? '' : 'none';
-    }
+    // 1) Ensure ALL lap/split buttons are visible in every mode
+    lapBtns.forEach((btn) => { btn.style.display = ''; });
+    splitBtns.forEach((btn) => { btn.style.display = ''; });
+
+    // 2) Do NOT set disabled or block clicks; L2/L3/L4 should be tappable
+    //    so they can promote the mode and start their driver.
+
+    // 3) Rely on our central visual logic
+    refreshButtonStates();
     wireClickSound();
 }
 
@@ -450,6 +491,7 @@ splitBtns[0].addEventListener('click', () => {
 });
 // L2/S2: Driver B
 lapBtns[1].addEventListener('click', () => {
+    if (maybeJumpModeForLap(1)) return;
     if (MODES[currentModeIndex] === 2) lap2Driver(timer2b);
 });
 splitBtns[1].addEventListener('click', () => {
@@ -664,18 +706,21 @@ splitBtns[0].addEventListener('click', () => {
     if (MODES[currentModeIndex] === 4) split4Driver(0);
 });
 lapBtns[1].addEventListener('click', () => {
+    if (maybeJumpModeForLap(1)) return;
     if (MODES[currentModeIndex] === 4) lap4Driver(1);
 });
 splitBtns[1].addEventListener('click', () => {
     if (MODES[currentModeIndex] === 4) split4Driver(1);
 });
 lapBtns[2].addEventListener('click', () => {
+    if (maybeJumpModeForLap(2)) return;
     if (MODES[currentModeIndex] === 4) lap4Driver(2);
 });
 splitBtns[2].addEventListener('click', () => {
     if (MODES[currentModeIndex] === 4) split4Driver(2);
 });
 lapBtns[3].addEventListener('click', () => {
+    if (maybeJumpModeForLap(3)) return;
     if (MODES[currentModeIndex] === 4) lap4Driver(3);
 });
 splitBtns[3].addEventListener('click', () => {
@@ -808,6 +853,7 @@ function onModeSwitch() {
     } else {
         stop1DriverTimer();
     }
+    refreshButtonStates();
 }
 
 modeHeader.removeEventListener('click', switchMode);
@@ -875,4 +921,6 @@ okBtn.addEventListener('click', () => {});
 
 // Initialize 1-driver mode fields
 if (MODES[currentModeIndex] === 1) update1DriverDataWindow();
+updateButtonGrid();
+refreshButtonStates();
 

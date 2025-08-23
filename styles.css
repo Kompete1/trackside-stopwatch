@@ -133,6 +133,18 @@ header#mode-header:active, header#mode-header:focus {
     background: #b28704;
 }
 
+/* Inactive driver buttons: visible, tappable, but muted */
+.button-grid button.inactive {
+  background: #6C757D;   /* muted grey */
+  color: #fff;
+  border-color: rgba(255,255,255,0.12);
+  opacity: 0.95;
+}
+.button-grid button.inactive:active,
+.button-grid button.inactive:focus {
+  background: #5c646a;
+}
+
 /* Popup background */
 .popup-bg {
   position: fixed;
