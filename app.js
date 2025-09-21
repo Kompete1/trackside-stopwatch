@@ -41,6 +41,32 @@ function resume2DriverAFromStore() {
   }
 }
 
+// Hydrate 4-driver (A & B) from persistent store and resume if needed
+function resume4DriversFromStore() {
+  // Seed A (idx 0) and B (idx 1) from persistent store
+  [0,1].forEach(i => {
+    const s = DRIVER_STATE[i];
+    const t = timer4[i];
+    t.elapsed      = s.elapsedMs || 0;
+    t.bestLapTime  = s.bestLapMs ?? null;
+    t.lastLapTime  = s.lastLapMs ?? null;
+    t.bestSplit    = s.bestSplit ?? null;
+    t.lapNum       = s.lap || 1;
+    // optional: bestLapNum is unknown from store; leave as-is
+  });
+
+  // Refresh UI once
+  update4DriverDataWindow();
+
+  // Resume if they were running
+  [0,1].forEach(i => {
+    if (DRIVER_STATE[i].running) {
+      // Baseline elapsed is already in t.elapsed; start ticking from now
+      start4DriverTimer(i);
+    }
+  });
+}
+
 const modeHeader = document.getElementById('mode-header');
 
 // --- GLOBAL BEST LAP (for purple highlight) -----------------------------
@@ -103,20 +129,15 @@ function refreshButtonStates() {
 
 // Promote mode if needed when tapping a Lap button (L2/L3/L4)
 function maybeJumpModeForLap(idx /* 0..3 for L1..L4 */) {
-  // idx=1 needs 2-driver; idx=2 or 3 needs 4-driver.
-  if (idx === 1 && MODES[currentModeIndex] !== 2) {
-    currentModeIndex = 1; // MODES[1] === 2
+  const mode = MODES[currentModeIndex];      // 1,2,4
+  const need = (idx === 1) ? 2 : ((idx === 2 || idx === 3) ? 4 : 1);
+
+  // Promote only; never demote
+  if (mode < need) {
+    currentModeIndex = MODES.indexOf(need);
     modeHeader.textContent = getModeName(MODES[currentModeIndex]);
     onModeSwitch();
-    // After DOM updates, re-click the same button to continue normal logic
-    setTimeout(() => lapBtns[idx].click(), 0);
-    return true;
-  }
-  if ((idx === 2 || idx === 3) && MODES[currentModeIndex] !== 4) {
-    currentModeIndex = 2; // MODES[2] === 4
-    modeHeader.textContent = getModeName(MODES[currentModeIndex]);
-    onModeSwitch();
-    setTimeout(() => lapBtns[idx].click(), 0);
+    setTimeout(() => lapBtns[idx].click(), 0); // continue with normal handler
     return true;
   }
   return false;
@@ -433,6 +454,9 @@ function update2DriverDataWindow() {
 }
 
 function tick2Driver() {
+    // Keep persistent elapsed in sync while running
+    if (timer2a.running) DRIVER_STATE[0].elapsedMs = Date.now() - timer2a.startTimestamp + timer2a.elapsed;
+    if (timer2b.running) DRIVER_STATE[1].elapsedMs = Date.now() - timer2b.startTimestamp + timer2b.elapsed;
     if (MODES[currentModeIndex] !== 2) return;
     update2DriverDataWindow();
 }
@@ -442,12 +466,27 @@ function start2DriverTimer(timer) {
     timer.running = true;
     timer.startTimestamp = Date.now();
     if (!interval2) interval2 = setInterval(tick2Driver, 31);
+    // Mirror to persistent store (A=0, B=1)
+    if (timer === timer2a) {
+      DRIVER_STATE[0].running = true;
+      DRIVER_STATE[0].startTs = nowMs() - (DRIVER_STATE[0].elapsedMs || 0);
+    }
+    if (timer === timer2b) {
+      DRIVER_STATE[1].running = true;
+      DRIVER_STATE[1].startTs = nowMs() - (DRIVER_STATE[1].elapsedMs || 0);
+    }
 }
 
 function stop2DriverTimer(timer) {
     if (!timer.running) return;
     timer.running = false;
     timer.elapsed += Date.now() - timer.startTimestamp;
+    // Mirror on stop
+    {
+      const idx = (timer === timer2a) ? 0 : 1;
+      DRIVER_STATE[idx].running = false;
+      DRIVER_STATE[idx].elapsedMs = Date.now() - timer.startTimestamp + timer.elapsed;
+    }
     timer.startTimestamp = null;
     // If both stopped, clear interval
     if (!timer2a.running && !timer2b.running && interval2) {
@@ -495,6 +534,14 @@ function lap2Driver(timer) {
             timer.bestLapNum = timer.lapNum;
         }
         applyLastLapColor(timer === timer2a ? 1 : 2, lapTime, prevBest); // NEW
+        // Mirror per-driver stats to store
+        {
+          const idx = (timer === timer2a) ? 0 : 1;
+          DRIVER_STATE[idx].lastLapMs = lapTime;
+          DRIVER_STATE[idx].bestLapMs = timer.bestLapTime;
+          DRIVER_STATE[idx].lap       = timer.lapNum;
+          if (timer.bestSplit != null) DRIVER_STATE[idx].bestSplit = timer.bestSplit;
+        }
         timer.diff = timer.bestLapTime != null ? lapTime - timer.bestLapTime : 0;
         timer.lapNum++;
         // Reset timer for next lap
@@ -516,6 +563,11 @@ function split2Driver(timer) {
     timer.lastSplit = splitTime;
     if (timer.bestSplit == null || splitTime < timer.bestSplit) {
         timer.bestSplit = splitTime;
+    }
+    {
+      const idx = (timer === timer2a) ? 0 : 1;
+      DRIVER_STATE[idx].bestSplit = timer.bestSplit;
+      DRIVER_STATE[idx].elapsedMs = Date.now() - timer.startTimestamp + timer.elapsed;
     }
     update2DriverDataWindow();
     recomputeGlobalBestSplit2Driver();
@@ -619,6 +671,11 @@ function lap4Driver(idx) {
             t.bestLapTime = lapTime;
             t.bestLapNum = t.lapNum;
         }
+        // Mirror per-driver stats to store
+        DRIVER_STATE[idx].lastLapMs = t.lastLapTime;
+        DRIVER_STATE[idx].bestLapMs = t.bestLapTime;
+        DRIVER_STATE[idx].lap       = t.lapNum;
+        if (t.bestSplit != null) DRIVER_STATE[idx].bestSplit = t.bestSplit;
         t.diff = t.bestLapTime != null ? lapTime - t.bestLapTime : 0;
         t.lapNum++;
         // Reset timer for next lap
@@ -642,12 +699,21 @@ function split4Driver(idx) {
     if (t.bestSplit == null || splitTime < t.bestSplit) {
         t.bestSplit = splitTime;
     }
+    DRIVER_STATE[idx].bestSplit = t.bestSplit;
+    DRIVER_STATE[idx].elapsedMs = Date.now() - t.startTimestamp + t.elapsed;
     update4DriverDataWindow();
     recomputeGlobalBestSplit4Driver();
 }
 
 
 function tick4Driver() {
+    // Keep persistent elapsed in sync while running (A..D)
+    for (let i = 0; i < 4; i++) {
+        const t = timer4[i];
+        if (t.running) {
+            DRIVER_STATE[i].elapsedMs = Date.now() - t.startTimestamp + t.elapsed;
+        }
+    }
     if (MODES[currentModeIndex] !== 4) return;
     update4DriverDataWindow();
     recomputeGlobalBestSplit4Driver();
@@ -658,12 +724,16 @@ function start4DriverTimer(idx) {
     timer4[idx].running = true;
     timer4[idx].startTimestamp = Date.now();
     if (!interval4) interval4 = setInterval(tick4Driver, 31);
+    DRIVER_STATE[idx].running = true;
+    DRIVER_STATE[idx].startTs = nowMs() - (DRIVER_STATE[idx].elapsedMs || 0);
 }
 
 function stop4DriverTimer(idx) {
     if (!timer4[idx].running) return;
     timer4[idx].running = false;
     timer4[idx].elapsed += Date.now() - timer4[idx].startTimestamp;
+    DRIVER_STATE[idx].running = false;
+    DRIVER_STATE[idx].elapsedMs = Date.now() - timer4[idx].startTimestamp + timer4[idx].elapsed;
     timer4[idx].startTimestamp = null;
     // If all stopped, clear interval
     if (!timer4.some(t => t.running) && interval4) {
@@ -903,7 +973,6 @@ splitBtns[0].addEventListener('click', () => {
     update1DriverDataWindow();
 });
 
-// Reset timer when switching modes or on reset action
 function onModeSwitch() {
     renderDataWindow();
     updateButtonGrid();
@@ -924,6 +993,36 @@ function onModeSwitch() {
         // Hydrate and resume Driver A in 2-driver mode
         resume2DriverAFromStore();
         update2DriverDataWindow();
+    } else if (mode === 4) {
+        // If coming from 1-driver and it was running, finalize its interval without killing store
+        if (typeof timer1 !== 'undefined' && timer1 && timer1.running) {
+            timer1.elapsed += Date.now() - timer1.startTimestamp;
+            clearInterval(timer1.intervalId);
+            timer1.intervalId = null;
+            timer1.running = false;
+            DRIVER_STATE[0].elapsedMs = nowMs() - DRIVER_STATE[0].startTs;
+        }
+        if (timer2a.running || timer2b.running) {
+            const now = Date.now();
+            if (timer2a.running) {
+                timer2a.elapsed += now - timer2a.startTimestamp;
+                timer2a.startTimestamp = null;
+                timer2a.running = false;
+                // sync A elapsed only; keep DRIVER_STATE[0].running as-is for resume
+                DRIVER_STATE[0].elapsedMs = timer2a.elapsed;
+            }
+            if (timer2b.running) {
+                timer2b.elapsed += now - timer2b.startTimestamp;
+                timer2b.startTimestamp = null;
+                timer2b.running = false;
+                // sync B elapsed only; keep DRIVER_STATE[1].running as-is for resume
+                DRIVER_STATE[1].elapsedMs = timer2b.elapsed;
+            }
+            if (interval2) { clearInterval(interval2); interval2 = null; }
+        }
+        // Hydrate and resume all four drivers
+        resume4DriversFromStore();
+        update4DriverDataWindow();
     } else {
         // Other modes: safe to fully stop 1-driver
         stop1DriverTimer();
