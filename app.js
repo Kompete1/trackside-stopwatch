@@ -201,6 +201,66 @@ function recomputeGlobalBestSplit4Driver() {
     refreshPurpleSplitHighlight();
 }
 
+// --- GLOBAL RESET: timers, persistent store, and highlights ---
+function resetDriverStore() {
+    for (let i = 0; i < 4; i++) {
+      const s = DRIVER_STATE[i];
+      s.running   = false;
+      s.startTs   = 0;
+      s.elapsedMs = 0;
+      s.lap       = 1;
+      s.lastLapMs = null;
+      s.bestLapMs = null;
+      s.bestSplit = null;
+    }
+}
+
+function clearBestHighlights() {
+    // reset global best caches
+    globalBestLapTime = null;
+    globalBestLapDriverIdx = null;
+    globalBestSplitTime = null;
+    globalBestSplitDriverIdx = null;
+
+    // remove any applied classes from the DOM (idempotent)
+    document.querySelectorAll('.best-lap-span').forEach(el => el.classList.remove('purple'));
+    document.querySelectorAll('.best-split-span').forEach(el => el.classList.remove('purple'));
+}
+
+function resetAllModesAndStore() {
+    // 1) Stop everything that could be ticking
+    try { stop1DriverTimer(); } catch (_) {}
+    try { stopAll2DriverTimers(); } catch (_) {}
+    try { stopAll4DriverTimers(); } catch (_) {}
+
+    // 2) Re-init per-mode timer objects WITHOUT leaving any running intervals
+    try { reset1DriverTimer(); } catch (_) {}
+    try { reset2DriverTimer(); } catch (_) {}
+    try { reset4DriverTimers(); } catch (_) {}
+
+    // 3) Clear persistent store and purple highlights
+    resetDriverStore();
+    clearBestHighlights();
+
+    // 4) Re-render current mode UI fresh (others will be fresh when you switch to them)
+    const mode = MODES[currentModeIndex];
+    if (mode === 1) {
+      update1DriverDataWindow();
+    } else if (mode === 2) {
+      update2DriverDataWindow();
+      recomputeGlobalBest2Driver();
+      recomputeGlobalBestSplit2Driver();
+    } else if (mode === 4) {
+      update4DriverDataWindow();
+      recomputeGlobalBest4Driver();
+      recomputeGlobalBestSplit4Driver();
+    }
+
+    // 5) Ensure buttons show correct active/grey state after reset
+    if (typeof updateButtonGrid === 'function') updateButtonGrid();
+    if (typeof refreshButtonStates === 'function') refreshButtonStates();
+}
+
 const dataWindow = document.getElementById('data-window');
 const buttonGrid = document.querySelector('.button-grid');
 const menuPopup = document.getElementById('menu-popup');
@@ -1065,13 +1125,7 @@ document.getElementById('stop-timing').addEventListener('click', () => {
     menuPopup.style.display = 'none';
 });
 document.getElementById('reset-timing').addEventListener('click', () => {
-    if (MODES[currentModeIndex] === 1) {
-        reset1DriverTimer();
-    } else if (MODES[currentModeIndex] === 2) {
-        reset2DriverTimer();
-    } else if (MODES[currentModeIndex] === 4) {
-        reset4DriverTimers();
-    }
+    resetAllModesAndStore();
     menuPopup.style.display = 'none';
 });
 document.getElementById('user-guide').addEventListener('click', () => {
