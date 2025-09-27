@@ -271,3 +271,20 @@ header#mode-header:active, header#mode-header:focus {
     transform: scale(0.96);
     transition: transform 70ms;   /* feels like a physical button */
 }
+
+#data-window .driver-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.25);
+    margin: 0.5rem 0;
+    opacity: 0.85;
+}
+
+.driver-highlightable {
+    transition: box-shadow 0.2s ease;
+    border-radius: 8px;
+}
+
+.running {
+    box-shadow: 0 0 0 2px rgba(46,204,113,0.9) inset;
+    border-radius: 8px;
+}
