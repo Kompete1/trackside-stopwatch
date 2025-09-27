@@ -319,7 +319,7 @@ function renderDataWindow() {
             <div>&nbsp;&nbsp;Last: <span id="d1-last">--:--.--</span> (Lap <span id="d1-last-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
             <div>&nbsp;&nbsp;Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
-            <br>
+            <div class="driver-divider" aria-hidden="true"></div>
             <div><strong>Driver B:</strong></div>
             <div>&nbsp;&nbsp;Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
             <div>&nbsp;&nbsp;Last: <span id="d2-last">--:--.--</span> (Lap <span id="d2-last-lap">#0</span>)</div>
@@ -333,16 +333,19 @@ function renderDataWindow() {
                 <div class="driver-sub">Last: <span id="d1-last">--:--.--</span> &nbsp; Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
             </div>
+            <div class="driver-divider" aria-hidden="true"></div>
             <div class="driver-block">
                 <div><strong>Driver B:</strong> Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d2-last">--:--.--</span> &nbsp; Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
             </div>
+            <div class="driver-divider" aria-hidden="true"></div>
             <div class="driver-block">
                 <div><strong>Driver C:</strong> Time: <span id="d3-time">00:00.00</span> (Lap <span id="d3-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d3-last">--:--.--</span> &nbsp; Best: <span id="d3-best" class="best-lap-span">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d3-split-count">(0)</span> <span id="d3-split">--.--</span> [<span id="d3-best-split" class="best-split-span">--.--</span>]</div>
             </div>
+            <div class="driver-divider" aria-hidden="true"></div>
             <div class="driver-block">
                 <div><strong>Driver D:</strong> Time: <span id="d4-time">00:00.00</span> (Lap <span id="d4-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d4-last">--:--.--</span> &nbsp; Best: <span id="d4-best" class="best-lap-span">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
