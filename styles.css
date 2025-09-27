@@ -278,3 +278,13 @@ header#mode-header:active, header#mode-header:focus {
     margin: 0.5rem 0;
     opacity: 0.85;
 }
+
+.driver-highlightable {
+    transition: box-shadow 0.2s ease;
+    border-radius: 8px;
+}
+
+.running {
+    box-shadow: 0 0 0 2px rgba(46,204,113,0.9) inset;
+    border-radius: 8px;
+}

@@ -127,6 +127,29 @@ function refreshButtonStates() {
   });
 }
 
+function syncRunningHighlights() {
+    const highlightTargets = [
+        ['driver1-time-line', 'driver1-section', 'driver-block-1'],
+        ['driver2-section', 'driver-block-2'],
+        ['driver-block-3'],
+        ['driver-block-4'],
+    ];
+
+    highlightTargets.forEach((ids, idx) => {
+        const isRunning = Boolean(DRIVER_STATE[idx] && DRIVER_STATE[idx].running);
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (isRunning) {
+                el.classList.add('running');
+            } else {
+                el.classList.remove('running');
+            }
+        });
+    });
+}
+
+
 // Promote mode if needed when tapping a Lap button (L2/L3/L4)
 function maybeJumpModeForLap(idx /* 0..3 for L1..L4 */) {
   const mode = MODES[currentModeIndex];      // 1,2,4
@@ -213,6 +236,8 @@ function resetDriverStore() {
       s.bestLapMs = null;
       s.bestSplit = null;
     }
+
+    syncRunningHighlights();
 }
 
 function clearBestHighlights() {
@@ -306,7 +331,7 @@ function renderDataWindow() {
     let html = '';
     if (mode === 1) {
         html = `
-            <div><strong>Time:</strong> <span id="d1-time">00:00.00</span> <span id="d1-lap">(Lap #1)</span></div>
+            <div id="driver1-time-line" class="time-line driver-highlightable"><strong>Time:</strong> <span id="d1-time">00:00.00</span> <span id="d1-lap">(Lap #1)</span></div>
             <div><strong>Last:</strong> <span id="d1-last">--:--.--</span> <span id="d1-last-lap">(Lap #0)</span></div>
             <div><strong>Diff:</strong> <span id="d1-diff">+00.00</span></div>
             <div><strong>Best:</strong> <span id="d1-best">--:--.--</span> <span id="d1-best-lap">(Lap #0)</span></div>
@@ -314,39 +339,43 @@ function renderDataWindow() {
         `;
     } else if (mode === 2) {
         html = `
-            <div><strong>Driver A:</strong></div>
-            <div>&nbsp;&nbsp;Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
-            <div>&nbsp;&nbsp;Last: <span id="d1-last">--:--.--</span> (Lap <span id="d1-last-lap">#0</span>)</div>
-            <div>&nbsp;&nbsp;Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
-            <div>&nbsp;&nbsp;Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
+            <div id="driver1-section" class="driver-section driver-highlightable">
+                <div><strong>Driver A:</strong></div>
+                <div>&nbsp;&nbsp;Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
+                <div>&nbsp;&nbsp;Last: <span id="d1-last">--:--.--</span> (Lap <span id="d1-last-lap">#0</span>)</div>
+                <div>&nbsp;&nbsp;Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
+                <div>&nbsp;&nbsp;Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
+            </div>
             <div class="driver-divider" aria-hidden="true"></div>
-            <div><strong>Driver B:</strong></div>
-            <div>&nbsp;&nbsp;Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
-            <div>&nbsp;&nbsp;Last: <span id="d2-last">--:--.--</span> (Lap <span id="d2-last-lap">#0</span>)</div>
-            <div>&nbsp;&nbsp;Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
-            <div>&nbsp;&nbsp;Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
+            <div id="driver2-section" class="driver-section driver-highlightable">
+                <div><strong>Driver B:</strong></div>
+                <div>&nbsp;&nbsp;Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
+                <div>&nbsp;&nbsp;Last: <span id="d2-last">--:--.--</span> (Lap <span id="d2-last-lap">#0</span>)</div>
+                <div>&nbsp;&nbsp;Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
+                <div>&nbsp;&nbsp;Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
+            </div>
         `;
     } else if (mode === 4) {
         html = `
-            <div class="driver-block">
+            <div class="driver-block driver-highlightable" id="driver-block-1">
                 <div><strong>Driver A:</strong> Time: <span id="d1-time">00:00.00</span> (Lap <span id="d1-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d1-last">--:--.--</span> &nbsp; Best: <span id="d1-best" class="best-lap-span">--:--.--</span> (Lap <span id="d1-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d1-split-count">(0)</span> <span id="d1-split">--.--</span> [<span id="d1-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-divider" aria-hidden="true"></div>
-            <div class="driver-block">
+            <div class="driver-block driver-highlightable" id="driver-block-2">
                 <div><strong>Driver B:</strong> Time: <span id="d2-time">00:00.00</span> (Lap <span id="d2-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d2-last">--:--.--</span> &nbsp; Best: <span id="d2-best" class="best-lap-span">--:--.--</span> (Lap <span id="d2-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d2-split-count">(0)</span> <span id="d2-split">--.--</span> [<span id="d2-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-divider" aria-hidden="true"></div>
-            <div class="driver-block">
+            <div class="driver-block driver-highlightable" id="driver-block-3">
                 <div><strong>Driver C:</strong> Time: <span id="d3-time">00:00.00</span> (Lap <span id="d3-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d3-last">--:--.--</span> &nbsp; Best: <span id="d3-best" class="best-lap-span">--:--.--</span> (Lap <span id="d3-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d3-split-count">(0)</span> <span id="d3-split">--.--</span> [<span id="d3-best-split" class="best-split-span">--.--</span>]</div>
             </div>
             <div class="driver-divider" aria-hidden="true"></div>
-            <div class="driver-block">
+            <div class="driver-block driver-highlightable" id="driver-block-4">
                 <div><strong>Driver D:</strong> Time: <span id="d4-time">00:00.00</span> (Lap <span id="d4-lap">#1</span>)</div>
                 <div class="driver-sub">Last: <span id="d4-last">--:--.--</span> &nbsp; Best: <span id="d4-best" class="best-lap-span">--:--.--</span> (Lap <span id="d4-best-lap">#0</span>)</div>
                 <div class="driver-sub">Split: <span id="d4-split-count">(0)</span> <span id="d4-split">--.--</span> [<span id="d4-best-split" class="best-split-span">--.--</span>]</div>
@@ -355,6 +384,7 @@ function renderDataWindow() {
     }
     dataWindow.innerHTML = html;
     wireClickSound();
+    syncRunningHighlights();
 }
 
 function updateButtonGrid() {
@@ -538,6 +568,8 @@ function start2DriverTimer(timer) {
       DRIVER_STATE[1].running = true;
       DRIVER_STATE[1].startTs = nowMs() - (DRIVER_STATE[1].elapsedMs || 0);
     }
+
+    syncRunningHighlights();
 }
 
 function stop2DriverTimer(timer) {
@@ -556,6 +588,8 @@ function stop2DriverTimer(timer) {
         clearInterval(interval2);
         interval2 = null;
     }
+
+    syncRunningHighlights();
 }
 
 function reset2DriverTimer() {
@@ -566,6 +600,8 @@ function reset2DriverTimer() {
     update2DriverDataWindow();
     recomputeGlobalBest2Driver();
     recomputeGlobalBestSplit2Driver();
+
+    syncRunningHighlights();
 }
 
 function lap2Driver(timer) {
@@ -789,6 +825,8 @@ function start4DriverTimer(idx) {
     if (!interval4) interval4 = setInterval(tick4Driver, 31);
     DRIVER_STATE[idx].running = true;
     DRIVER_STATE[idx].startTs = nowMs() - (DRIVER_STATE[idx].elapsedMs || 0);
+
+    syncRunningHighlights();
 }
 
 function stop4DriverTimer(idx) {
@@ -803,6 +841,8 @@ function stop4DriverTimer(idx) {
         clearInterval(interval4);
         interval4 = null;
     }
+
+    syncRunningHighlights();
 }
 
 function reset4DriverTimers() {
@@ -811,6 +851,8 @@ function reset4DriverTimers() {
     update4DriverDataWindow();
     recomputeGlobalBest4Driver();
     recomputeGlobalBestSplit4Driver();
+
+    syncRunningHighlights();
 }
 
 function lap4Driver(idx) {
@@ -935,6 +977,8 @@ function start1DriverTimer() {
     timer1.running = true;
     timer1.startTimestamp = Date.now();
     timer1.intervalId = setInterval(tick1Driver, 31); // ~30fps
+
+    syncRunningHighlights();
 }
 
 function stop1DriverTimer() {
@@ -946,6 +990,8 @@ function stop1DriverTimer() {
     // Mirror into persistent store on stop
     DRIVER_STATE[0].running = false;
     DRIVER_STATE[0].elapsedMs = nowMs() - DRIVER_STATE[0].startTs; // final sync
+
+    syncRunningHighlights();
 }
 
 function reset1DriverTimer() {
@@ -967,6 +1013,8 @@ function reset1DriverTimer() {
         bestSplit: null,
     };
     update1DriverDataWindow();
+
+    syncRunningHighlights();
 }
 
 // L1 button logic
