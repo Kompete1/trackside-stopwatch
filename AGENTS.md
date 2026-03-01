@@ -14,8 +14,10 @@ This repo is a static PWA lap timer. Timing accuracy is the highest priority. An
 
 ## Testing Expectations
 
-- Run `npm test` after timing-engine changes
+- Run `npm test` (Vitest) after timing-engine changes
+- Use `npm run test:unit` when iterating specifically on timing-engine behavior
 - Run `npm run test:e2e` after UI interaction changes when dependencies are installed
+- Prefer stable element IDs for Playwright selectors and keep them intact when adjusting UI structure
 - Manually verify start, lap, split, pause, reset, restore, and CSV export on mobile-sized screens
 
 ## Safe Edit Boundaries
@@ -31,4 +33,5 @@ Always re-check:
 - pause does not inflate elapsed time
 - split positions compare against the same split position only
 - switching display modes does not lose active timers
+- active timing blocks manual mode-header layout changes
 - local restore matches the pre-refresh state
