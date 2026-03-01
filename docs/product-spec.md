@@ -45,3 +45,14 @@ These color meanings apply to timing values and timing-state emphasis, not to me
 
 - CSV export includes each completed lap per driver
 - Each row includes lap time and any captured split times for that lap
+
+## Session Summary
+
+- The menu includes a read-only `Summary` action
+- The summary is derived from existing `lapHistory` data and does not change timing state
+- The summary shows visible drivers only for the current display mode
+- Each visible driver shows:
+  - completed lap count
+  - best lap
+  - last lap
+  - best split times by split position

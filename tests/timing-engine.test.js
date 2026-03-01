@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  buildSessionSummary,
   buildExportRows,
   cloneStateForStorage,
   createInitialAppState,
@@ -215,6 +216,43 @@ describe("timing engine", () => {
       lapIndex: 1,
       lapMs: 4_000,
       splitsMs: [],
+    });
+  });
+
+  test("session summary derives per-driver lap aggregates from visible drivers", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(3_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+    clock.advance(2_000);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+
+    performAction(state, { type: "lapButton", driverId: 2 }, clock);
+    clock.advance(4_000);
+    performAction(state, { type: "lapButton", driverId: 2 }, clock);
+
+    performAction(state, { type: "setMode", mode: 2 }, clock);
+    const summary = buildSessionSummary(state);
+
+    expect(summary.visibleDrivers).toBe(2);
+    expect(summary.totalCompletedLaps).toBe(2);
+    expect(summary.drivers[0]).toMatchObject({
+      driverId: 1,
+      label: "A",
+      completedLaps: 1,
+      bestLapMs: 5_000,
+      lastLapMs: 5_000,
+      bestSplitsMs: [3_000],
+    });
+    expect(summary.drivers[1]).toMatchObject({
+      driverId: 2,
+      label: "B",
+      completedLaps: 1,
+      bestLapMs: 4_000,
+      lastLapMs: 4_000,
+      bestSplitsMs: [],
     });
   });
 });

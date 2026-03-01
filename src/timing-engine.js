@@ -464,3 +464,22 @@ export function buildExportRows(state) {
     }))
   );
 }
+
+export function buildSessionSummary(state, mode = state.mode) {
+  const visibleDrivers = getVisibleDriverCount(mode);
+  const drivers = state.drivers.slice(0, visibleDrivers).map((driver) => ({
+    driverId: driver.driverId,
+    label: driver.label,
+    completedLaps: driver.lapHistory.length,
+    bestLapMs: driver.bestLapMs,
+    lastLapMs: driver.lastLapMs,
+    bestSplitsMs: driver.bestSplitsMs.filter((value) => Number.isFinite(value)),
+  }));
+
+  return {
+    mode: normalizeMode(mode),
+    visibleDrivers,
+    totalCompletedLaps: drivers.reduce((total, driver) => total + driver.completedLaps, 0),
+    drivers,
+  };
+}

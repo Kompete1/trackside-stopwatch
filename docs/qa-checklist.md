@@ -22,6 +22,12 @@
 - Reload after paused timing and confirm paused state is preserved
 - Change settings, reload, and confirm settings persist
 
+## Summary
+
+- Record at least one completed lap and confirm Menu > Summary shows the correct lap count
+- Confirm Summary best lap and last lap match the visible driver's recorded laps
+- Confirm Summary best splits match the driver's best split positions
+
 ## PWA
 
 - Install the app to the home screen

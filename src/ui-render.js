@@ -190,6 +190,51 @@ export function updateStatusBanner(statusBanner, message, tone = "info") {
   statusBanner.dataset.tone = tone;
 }
 
+function formatBestSplitSummary(bestSplitsMs) {
+  if (!Array.isArray(bestSplitsMs) || !bestSplitsMs.length) {
+    return "No splits yet";
+  }
+
+  return bestSplitsMs
+    .map((splitMs, index) => `S${index + 1} ${formatSplit(splitMs)}`)
+    .join(" | ");
+}
+
+export function renderSessionSummary(container, summary) {
+  const totalLabel = summary.totalCompletedLaps === 1 ? "1 completed lap" : `${summary.totalCompletedLaps} completed laps`;
+  const cardsMarkup = summary.drivers
+    .map(
+      (driver) => `
+        <section class="summary-card" id="summary-driver-${driver.driverId}">
+          <div class="summary-card-head">
+            <span class="summary-driver-name">Driver ${driver.label}</span>
+            <span class="summary-lap-count">${driver.completedLaps} lap${driver.completedLaps === 1 ? "" : "s"}</span>
+          </div>
+          <div class="summary-metrics">
+            <div class="summary-metric-row">
+              <span class="summary-label">Best Lap</span>
+              <span class="summary-value">${formatClock(driver.bestLapMs)}</span>
+            </div>
+            <div class="summary-metric-row">
+              <span class="summary-label">Last Lap</span>
+              <span class="summary-value">${formatClock(driver.lastLapMs)}</span>
+            </div>
+          </div>
+          <div class="summary-splits">
+            <span class="summary-label">Best Splits</span>
+            <span class="summary-split-list">${formatBestSplitSummary(driver.bestSplitsMs)}</span>
+          </div>
+        </section>
+      `
+    )
+    .join("");
+
+  container.innerHTML = `
+    <div class="summary-topline">${totalLabel}</div>
+    <div class="summary-grid">${cardsMarkup}</div>
+  `;
+}
+
 export function updateDataWindow(container, state, timeSource) {
   const visibleDrivers = getVisibleDriverCount(state.mode);
   const activeDrivers = state.drivers.slice(0, visibleDrivers);
