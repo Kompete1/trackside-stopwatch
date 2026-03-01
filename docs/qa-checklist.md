@@ -28,6 +28,12 @@
 - Confirm Summary best lap and last lap match the visible driver's recorded laps
 - Confirm Summary best splits match the driver's best split positions
 
+## Glove Mode
+
+- Enable Glove Mode in Settings and confirm the app keeps the same fixed shell layout
+- Confirm buttons and key panels gain stronger contrast and clearer borders
+- Reload and confirm Glove Mode stays enabled
+
 ## PWA
 
 - Install the app to the home screen

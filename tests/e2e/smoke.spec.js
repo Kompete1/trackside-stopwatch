@@ -64,16 +64,19 @@ test.describe("trackside stopwatch flows", () => {
 
     await page.fill("#settings-driver-1", "ZX");
     await page.selectOption("#settings-mode", "2");
+    await page.locator("#settings-glove-mode").check();
     await page.locator("#save-settings").click();
 
     await expect(page.locator("#status-banner")).toContainText("Settings saved.");
     await expect(page.locator("#mode-header")).toHaveText("2 Driver Mode");
     await expect(page.locator("#d1-label")).toHaveText("Driver ZX");
+    await expect(page.locator("body")).toHaveClass(/glove-mode/);
 
     await page.reload();
 
     await expect(page.locator("#mode-header")).toHaveText("2 Driver Mode");
     await expect(page.locator("#d1-label")).toHaveText("Driver ZX");
+    await expect(page.locator("body")).toHaveClass(/glove-mode/);
   });
 
   test("export warns when there are no completed laps", async ({ page }) => {

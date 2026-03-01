@@ -137,6 +137,7 @@ export function startApp(documentRef = document) {
     haptics: documentRef.getElementById("settings-haptics"),
     wakeLock: documentRef.getElementById("settings-wake-lock"),
     accidentalTapGuard: documentRef.getElementById("settings-guard"),
+    gloveMode: documentRef.getElementById("settings-glove-mode"),
     feedbackProfile: documentRef.getElementById("settings-profile"),
     preferredMode: documentRef.getElementById("settings-mode"),
     driverLabels: [1, 2, 3, 4].map((index) => documentRef.getElementById(`settings-driver-${index}`)),
@@ -174,6 +175,14 @@ export function startApp(documentRef = document) {
 
   function syncWakeLock() {
     feedback.syncWakeLock(hasAnyRunningDrivers(state));
+  }
+
+  function syncUiModes() {
+    const bodyRef = documentRef.body;
+    if (!bodyRef) {
+      return;
+    }
+    bodyRef.classList.toggle("glove-mode", settings.gloveModeEnabled);
   }
 
   function ensureLayout() {
@@ -397,6 +406,7 @@ export function startApp(documentRef = document) {
       driver.label = settings.driverLabels[index];
     });
     applySettingsToState(state, settings);
+    syncUiModes();
     render();
     persistState();
     syncWakeLock();
@@ -439,6 +449,7 @@ export function startApp(documentRef = document) {
   render();
   persistState();
   syncWakeLock();
+  syncUiModes();
 
   if (storedSession && hasAnyTimingData(state)) {
     showStatus("Previous session restored.", "success", 2800);

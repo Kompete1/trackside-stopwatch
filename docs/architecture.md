@@ -35,6 +35,11 @@
 - Summary data is not persisted separately and should always be recomputed from canonical state
 - `buildSessionSummary()` in `src/timing-engine.js` is the source for summary aggregation
 
+## Settings-Driven UI Modes
+
+- `gloveModeEnabled` is stored in user settings and applied as a UI-only body class
+- Glove mode must not change timing state, timing math, or fixed-shell layout constraints
+
 ## Testing Seams
 
 - `src/timing-engine.js` is the primary unit-test seam and is exercised with fake clocks in Vitest

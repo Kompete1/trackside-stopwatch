@@ -49,6 +49,7 @@ export function normalizeSettings(input = {}) {
     wakeLockEnabled: input.wakeLockEnabled !== false,
     preferredMode: normalizeMode(input.preferredMode || 1),
     accidentalTapGuard: input.accidentalTapGuard !== false,
+    gloveModeEnabled: input.gloveModeEnabled === true,
     theme: "motorsport",
     driverLabels,
   };
