@@ -37,3 +37,4 @@ Always re-check:
 - switching display modes does not lose active timers
 - active timing blocks manual mode-header layout changes
 - local restore matches the pre-refresh state
+- user-derived labels still render correctly after any UI refactor

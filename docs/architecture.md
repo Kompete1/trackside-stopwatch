@@ -7,7 +7,7 @@
 - `src/timing-engine.js`: canonical state, timing math, export rows
 - `src/store.js`: persistence adapter
 - `src/feedback.js`: sound, haptics, wake lock
-- `src/ui-render.js`: templates, formatting, and DOM updates
+- `src/ui-render.js`: DOM-safe view construction, formatting, and display updates
 
 ## State Model
 
@@ -39,6 +39,12 @@
 
 - `gloveModeEnabled` is stored in user settings and applied as a UI-only body class
 - Glove mode must not change timing state, timing math, or fixed-shell layout constraints
+
+## Rendering Strategy
+
+- Timing cards and summary cards are built with DOM node creation and `replaceChildren()`
+- User-derived values such as driver labels should be assigned through `textContent`
+- Avoid reintroducing HTML-string rendering for user-influenced content
 
 ## Testing Seams
 
