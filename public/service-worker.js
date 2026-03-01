@@ -1,10 +1,27 @@
-const CACHE_NAME = "trackside-stopwatch-runtime-v3";
-const CORE_ROUTES = ["./", "./index.html"];
+const APP_SHELL_VERSION = "2026-03-01-v1";
+const CACHE_NAME = `trackside-stopwatch-runtime-${APP_SHELL_VERSION}`;
+const OFFLINE_NAVIGATION_FALLBACK = "./index.html";
+const PRECACHE_ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./styles.css",
+  "./click.mp3",
+  "./mixkit-modern-click-box-check-1120.wav",
+  "./icons/apple-touch-icon.png",
+  "./icons/icon-192x192.png",
+  "./icons/icon-512x512.png",
+  "./icons/icon-512x512-maskable.png",
+];
+
+function shouldCacheResponse(response) {
+  return Boolean(response && response.ok && response.type !== "error");
+}
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ROUTES))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
   );
 });
 
@@ -36,7 +53,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.status === 200) {
+        if (shouldCacheResponse(response)) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         }
@@ -49,7 +66,7 @@ self.addEventListener("fetch", (event) => {
         }
 
         if (event.request.mode === "navigate") {
-          return caches.match("./index.html");
+          return caches.match(OFFLINE_NAVIGATION_FALLBACK);
         }
 
         return new Response("", { status: 504, statusText: "Offline" });

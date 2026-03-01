@@ -29,8 +29,14 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 ## PWA Notes
 
 - `app.js` registers the service worker on page load
-- `service-worker.js` caches the core shell and module files for offline reuse
+- `service-worker.js` precaches stable shell assets and runtime-caches successful same-origin requests
 - `manifest.json` is configured for standalone install mode
+
+## Release Workflow
+
+- Run `npm test`, `npm run test:e2e`, and `npm run build` before shipping
+- When the app shell changes, bump `APP_SHELL_VERSION` in both service worker files
+- Keep the service worker precache list aligned with stable offline assets such as icons, manifest, CSS, and audio
 
 ## Current Structure
 
