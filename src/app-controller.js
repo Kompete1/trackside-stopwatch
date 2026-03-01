@@ -214,10 +214,16 @@ export function startApp(documentRef = document) {
 
   function openOverlay(overlay) {
     overlay.hidden = false;
+    if (overlay === menuPopup) {
+      menuButton.setAttribute("aria-expanded", "true");
+    }
   }
 
   function closeOverlay(overlay) {
     overlay.hidden = true;
+    if (overlay === menuPopup) {
+      menuButton.setAttribute("aria-expanded", "false");
+    }
   }
 
   function canProcessTap(key) {
@@ -318,11 +324,17 @@ export function startApp(documentRef = document) {
 
   menuButton.addEventListener("click", () => {
     feedback.playTap();
-    openOverlay(menuPopup);
+    if (menuPopup.hidden) {
+      openOverlay(menuPopup);
+      return;
+    }
+
+    closeOverlay(menuPopup);
   });
 
   exportButton.addEventListener("click", () => {
     feedback.playTap();
+    closeOverlay(menuPopup);
     exportCurrentSession();
   });
 

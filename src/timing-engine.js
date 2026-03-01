@@ -2,6 +2,7 @@ export const APP_STATE_VERSION = 2;
 export const MODES = [1, 2, 4];
 export const MAX_DRIVERS = 4;
 const MAX_EVENT_LOG = 500;
+const MAX_DRIVER_LABEL_LENGTH = 10;
 
 const DEFAULT_LABELS = ["A", "B", "C", "D"];
 
@@ -28,7 +29,7 @@ export function sanitizeDriverLabel(label, fallback = "DRV") {
     .toUpperCase()
     .replace(/[^A-Z0-9 ]/g, "")
     .trim()
-    .slice(0, 4);
+    .slice(0, MAX_DRIVER_LABEL_LENGTH);
   return cleaned || fallback;
 }
 

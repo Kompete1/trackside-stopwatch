@@ -42,6 +42,11 @@
 
 ## Rendering Strategy
 
+- The primary shell uses a top toolbar (`#mode-header` plus the top-right menu trigger), a fixed timing viewport, and a fixed footer button grid
+- `L1` through `L4` and `S1` through `S4` remain pinned in the footer across display modes; the timing cards absorb reclaimed layout space
+- The lap/split footer is a hard layout invariant: its on-screen position must not change when switching between 1-driver, 2-driver, and 4-driver modes
+- The live running timer is a hard visual-priority invariant and must remain more prominent than names, lap metadata, and secondary metrics in every mode
+- Metric labels (`Last`, `Best`, `Diff`, `Split`) are a physical-device-style anchor and must not shift position when values change
 - Timing cards and summary cards are built with DOM node creation and `replaceChildren()`
 - User-derived values such as driver labels should be assigned through `textContent`
 - Avoid reintroducing HTML-string rendering for user-influenced content
@@ -51,6 +56,13 @@
 - `src/timing-engine.js` is the primary unit-test seam and is exercised with fake clocks in Vitest
 - `src/app-controller.js` and `src/ui-render.js` are covered by Playwright flow tests for key user journeys and mobile shell behavior
 - Timing and export regressions should be proven in engine tests before UI-heavy changes land
+
+## Menu Actions
+
+- The top-right hamburger menu is a controller-driven UI action surface owned by `src/app-controller.js`
+- The menu action order is fixed as `Stop Timing`, `Reset Timing`, `Summary`, `Export CSV`, `Settings`, `Help`
+- CSV export is triggered from the menu flow, not from a dedicated footer button
+- Summary, Settings, Help, Stop Timing, and Reset remain menu actions layered on top of the same canonical timing state
 
 ## PWA Strategy
 

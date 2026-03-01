@@ -34,9 +34,11 @@
   --space-2: 16px;
   --space-3: 24px;
   --space-4: 32px;
+  --shell-pad: 16px;
+  --toolbar-size: 56px;
   --button-row-height: 52px;
   --button-gap: 8px;
-  --button-grid-height: 292px;
+  --button-grid-height: 232px;
   --font-ui: "Trebuchet MS", "Segoe UI", sans-serif;
   --font-display: "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
 }
@@ -95,11 +97,12 @@ select:focus-visible,
   width: min(100%, 460px);
   height: min(calc(100dvh - 32px), 900px);
   max-height: calc(100dvh - 32px);
+  position: relative;
   min-height: 0;
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) var(--button-grid-height);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-2);
+  padding: var(--shell-pad);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
@@ -110,12 +113,19 @@ select:focus-visible,
   box-shadow: var(--shadow);
 }
 
+.top-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--toolbar-size);
+  gap: var(--space-1);
+  align-items: stretch;
+}
+
 #mode-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 56px;
-  padding: 0 var(--space-2);
+  min-height: var(--toolbar-size);
+  padding: 0 14px;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, rgba(31, 122, 248, 0.18), rgba(246, 185, 59, 0.1));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -125,6 +135,27 @@ select:focus-visible,
   font-size: clamp(1.2rem, 3vw, 1.6rem);
   font-weight: 700;
   user-select: none;
+}
+
+.menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: var(--toolbar-size);
+  padding: 0;
+}
+
+.menu-toggle-lines {
+  display: grid;
+  gap: 5px;
+  width: 22px;
+}
+
+.menu-toggle-lines span {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--gold);
 }
 
 .status-banner {
@@ -150,6 +181,7 @@ select:focus-visible,
 }
 
 #data-window {
+  flex: 1 1 auto;
   margin-top: 0;
   min-height: 0;
   padding: var(--space-1);
@@ -247,7 +279,8 @@ select:focus-visible,
 
 .driver-time {
   grid-area: time;
-  justify-self: start;
+  justify-self: center;
+  text-align: center;
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 9vw, 4rem);
   line-height: 0.92;
@@ -326,15 +359,17 @@ select:focus-visible,
 }
 
 .button-grid {
-  margin-top: 0;
+  flex: 0 0 var(--button-grid-height);
+  margin-top: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(5, var(--button-row-height));
+  grid-template-rows: repeat(4, var(--button-row-height));
   gap: var(--button-gap);
   height: var(--button-grid-height);
   min-height: var(--button-grid-height);
 }
 
+.top-bar button,
 .button-grid button,
 .modal-actions button,
 .sheet-menu button {
@@ -348,9 +383,14 @@ select:focus-visible,
   transition: filter 0.14s ease, transform 0.08s ease;
 }
 
+.top-bar button,
 .button-grid button {
   min-height: 0;
   height: 100%;
+}
+
+.top-bar .menu-toggle {
+  padding: 0;
 }
 
 .modal-actions button,
@@ -358,6 +398,7 @@ select:focus-visible,
   min-height: 56px;
 }
 
+.top-bar button:hover,
 .button-grid button:hover,
 .modal-actions button:hover,
 .sheet-menu button:hover {
@@ -386,6 +427,7 @@ select:focus-visible,
   opacity: 0.82;
 }
 
+body.glove-mode .top-bar button,
 body.glove-mode .button-grid button,
 body.glove-mode .modal-actions button,
 body.glove-mode .sheet-menu button {
@@ -419,6 +461,76 @@ body.glove-mode .label-grid label {
   grid-template-rows: minmax(0, 1fr);
 }
 
+#data-window.mode-1 {
+  padding: 10px;
+}
+
+#data-window.mode-1 .driver-card {
+  gap: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
+    rgba(255, 255, 255, 0.025);
+}
+
+#data-window.mode-1 .driver-card-head {
+  gap: 8px 12px;
+  align-items: start;
+  font-size: 1rem;
+}
+
+#data-window.mode-1 .driver-name {
+  letter-spacing: 0.06em;
+  max-width: 100%;
+  font-size: clamp(0.96rem, 2.7vw, 1.08rem);
+  line-height: 1.1;
+}
+
+#data-window.mode-1 .driver-lap {
+  font-size: clamp(1.05rem, 3.1vw, 1.35rem);
+  color: var(--muted);
+}
+
+#data-window.mode-1 .driver-time {
+  font-size: clamp(2.7rem, 15vw, 5.15rem);
+  line-height: 0.88;
+  letter-spacing: 0.03em;
+}
+
+#data-window.mode-1 .metric-grid {
+  gap: 12px;
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+#data-window.mode-1 .metric-tile {
+  padding: 16px;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 26%),
+    rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+#data-window.mode-1 .metric-main {
+  gap: 8px;
+}
+
+#data-window.mode-1 .metric-value {
+  font-size: clamp(1.4rem, 4.25vw, 1.95rem);
+  line-height: 1;
+}
+
+#data-window.mode-1 .metric-label {
+  font-size: 0.98rem;
+  letter-spacing: 0.07em;
+}
+
+#data-window.mode-1 .metric-sub {
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
 #data-window.mode-2 {
   padding: 6px;
 }
@@ -429,21 +541,36 @@ body.glove-mode .label-grid label {
 }
 
 #data-window.mode-2 .driver-card {
-  gap: 10px;
+  gap: 12px;
   padding: 12px;
 }
 
 #data-window.mode-2 .driver-card-head {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "name time lap";
-  align-items: baseline;
-  gap: 6px 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name lap"
+    "time time";
+  align-items: end;
+  gap: 5px 10px;
+}
+
+#data-window.mode-2 .driver-name {
+  max-width: 100%;
+  font-size: clamp(0.78rem, 2.05vw, 0.9rem);
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+}
+
+#data-window.mode-2 .driver-lap {
+  font-size: clamp(0.76rem, 1.95vw, 0.88rem);
 }
 
 #data-window.mode-2 .driver-time {
   justify-self: center;
   text-align: center;
-  font-size: clamp(1.6rem, 6.4vw, 2.35rem);
+  font-size: clamp(1.9rem, 7.2vw, 2.8rem);
+  line-height: 0.9;
+  letter-spacing: 0.035em;
 }
 
 #data-window.mode-2 .metric-grid {
@@ -455,18 +582,30 @@ body.glove-mode .label-grid label {
 
 #data-window.mode-2 .metric-tile {
   padding: 9px 12px;
-  justify-content: center;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 #data-window.mode-2 .metric-main {
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: 10px;
 }
 
+#data-window.mode-2 .metric-label {
+  justify-self: start;
+}
+
 #data-window.mode-2 .metric-value {
-  font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+  font-size: clamp(1.12rem, 3.15vw, 1.45rem);
+  justify-self: end;
+  text-align: right;
+}
+
+#data-window.mode-2 .metric-label {
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
 }
 
 #data-window.mode-2 .metric-sub {
@@ -475,18 +614,20 @@ body.glove-mode .label-grid label {
 }
 
 #data-window.mode-2 .metric-split-tile {
+  align-items: stretch;
   justify-content: flex-start;
   gap: 5px;
 }
 
 #data-window.mode-2 .metric-split-tile .metric-main {
   flex-shrink: 0;
-  align-items: center;
+  align-items: start;
 }
 
 #data-window.mode-2 .metric-split-tile .metric-sub {
   flex-shrink: 0;
   align-self: flex-start;
+  text-align: left;
 }
 
 #data-window.mode-2 .metric-split-tile .metric-sub {
@@ -502,17 +643,20 @@ body.glove-mode .label-grid label {
 }
 
 #data-window.mode-4 .driver-card {
-  gap: 6px;
-  padding: 9px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 9px;
   border-radius: 14px;
 }
 
 #data-window.mode-4 .driver-card-head {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "name time lap";
-  align-items: baseline;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name lap"
+    "time time";
+  align-items: end;
   gap: 4px 6px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 #data-window.mode-4 .driver-name {
@@ -520,21 +664,26 @@ body.glove-mode .label-grid label {
 }
 
 #data-window.mode-4 .driver-lap {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
 }
 
 #data-window.mode-4 .driver-time {
-  font-size: clamp(1.18rem, 4.8vw, 1.55rem);
+  font-size: clamp(1.34rem, 5.25vw, 1.9rem);
+  line-height: 0.9;
+  letter-spacing: 0.03em;
 }
 
 #data-window.mode-4 .metric-grid {
+  flex: 1 1 auto;
+  align-content: stretch;
   gap: 4px;
   min-height: 0;
   grid-auto-rows: minmax(0, 1fr);
 }
 
 #data-window.mode-4 .metric-tile {
-  padding: 6px 7px;
+  justify-content: center;
+  padding: 6px;
   border-radius: 10px;
 }
 
@@ -544,11 +693,11 @@ body.glove-mode .label-grid label {
 }
 
 #data-window.mode-4 .metric-value {
-  font-size: clamp(0.9rem, 2.55vw, 1.12rem);
+  font-size: clamp(1.08rem, 2.9vw, 1.34rem);
 }
 
 #data-window.mode-4 .metric-sub {
-  font-size: 0.64rem;
+  font-size: 0.68rem;
 }
 
 #data-window.mode-4 .metric-split-tile {
@@ -584,6 +733,14 @@ body.glove-mode .label-grid label {
   z-index: 1000;
 }
 
+.menu-overlay {
+  position: absolute;
+  inset: 0;
+  place-items: start end;
+  padding: calc(var(--shell-pad) + var(--toolbar-size) + var(--space-1)) var(--shell-pad) var(--shell-pad);
+  z-index: 20;
+}
+
 .sheet-menu,
 .modal-window {
   width: min(100%, 440px);
@@ -601,7 +758,11 @@ body.glove-mode .label-grid label {
   padding: var(--space-2);
 }
 
-.sheet-menu button {
+.anchored-menu {
+  width: min(100%, 280px);
+}
+
+.sheet-menu button:not(.amber):not(.gray):not(.blue):not(.green) {
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -798,6 +959,10 @@ select {
 }
 
 @media (max-width: 700px) {
+  :root {
+    --shell-pad: 12px;
+  }
+
   body {
     padding: 0;
   }
@@ -807,7 +972,6 @@ select {
     height: 100dvh;
     max-height: 100dvh;
     border-radius: 0;
-    padding: 12px;
   }
 }
 
@@ -825,9 +989,10 @@ select {
 
 @media (orientation: landscape) and (max-width: 960px) {
   :root {
+    --shell-pad: 8px;
     --button-row-height: 44px;
     --button-gap: 6px;
-    --button-grid-height: 244px;
+    --button-grid-height: 194px;
   }
 
   body {
@@ -838,7 +1003,6 @@ select {
     width: min(100%, 880px);
     height: min(calc(100dvh - 16px), 560px);
     max-height: calc(100dvh - 16px);
-    padding: 8px;
   }
 
   .driver-grid.four-up {
