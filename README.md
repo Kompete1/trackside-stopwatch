@@ -10,6 +10,7 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 - Exports completed laps to CSV
 - Shows a read-only in-app session summary from completed laps
 - Supports optional haptics, sound feedback, and screen wake lock
+- Includes an optional glove mode for stronger contrast and clearer controls
 - Blocks manual mode switching while timing is actively running
 - Runs as a static web app and can be installed as a PWA
 

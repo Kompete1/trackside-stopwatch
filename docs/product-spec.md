@@ -56,3 +56,10 @@ These color meanings apply to timing values and timing-state emphasis, not to me
   - best lap
   - last lap
   - best split times by split position
+
+## Glove Mode
+
+- `Glove Mode` is an optional settings toggle
+- It does not change timing behavior or the fixed-shell layout
+- It increases control emphasis through stronger contrast, heavier button weight, and clearer visual boundaries
+- It is intended to make actions easier to identify when using gloves or in harsher outdoor conditions

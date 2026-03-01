@@ -30,6 +30,11 @@ function createState() {
 }
 
 describe("timing engine", () => {
+  test("normalizes glove mode settings with a safe default", () => {
+    expect(normalizeSettings().gloveModeEnabled).toBe(false);
+    expect(normalizeSettings({ gloveModeEnabled: true }).gloveModeEnabled).toBe(true);
+  });
+
   test("stop keeps elapsed time exact across repeated pauses", () => {
     const clock = createFakeTimeSource();
     const state = createState();

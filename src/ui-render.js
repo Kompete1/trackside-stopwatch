@@ -158,6 +158,7 @@ export function populateSettingsForm(formElements, settings) {
   formElements.haptics.checked = settings.hapticsEnabled;
   formElements.wakeLock.checked = settings.wakeLockEnabled;
   formElements.accidentalTapGuard.checked = settings.accidentalTapGuard;
+  formElements.gloveMode.checked = settings.gloveModeEnabled;
   formElements.feedbackProfile.value = settings.feedbackProfile;
   formElements.preferredMode.value = String(settings.preferredMode);
   formElements.driverLabels.forEach((input, index) => {
@@ -171,6 +172,7 @@ export function readSettingsForm(formElements) {
     hapticsEnabled: formElements.haptics.checked,
     wakeLockEnabled: formElements.wakeLock.checked,
     accidentalTapGuard: formElements.accidentalTapGuard.checked,
+    gloveModeEnabled: formElements.gloveMode.checked,
     feedbackProfile: formElements.feedbackProfile.value,
     preferredMode: Number(formElements.preferredMode.value),
     driverLabels: formElements.driverLabels.map((input) => input.value),
