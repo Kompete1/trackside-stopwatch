@@ -1,0 +1,36 @@
+# Architecture
+
+## Modules
+
+- `app.js`: browser bootstrap
+- `src/app-controller.js`: wires DOM events to engine actions
+- `src/timing-engine.js`: canonical state, timing math, export rows
+- `src/store.js`: persistence adapter
+- `src/feedback.js`: sound, haptics, wake lock
+- `src/ui-render.js`: templates, formatting, and DOM updates
+
+## State Model
+
+- One `AppSessionState`
+- Four `DriverSessionState` entries, always present
+- Display mode changes only the rendered layout
+
+## Event Flow
+
+1. User taps a control
+2. `app-controller` applies a timing action
+3. `timing-engine` mutates the canonical state and appends an event
+4. `ui-render` refreshes visible cards
+5. `store` persists the current session snapshot
+
+## Persistence Strategy
+
+- Save after every meaningful action
+- Save on a background heartbeat while timing is active
+- Save on visibility changes and before unload
+
+## PWA Strategy
+
+- Module entrypoint runs as a standard web app
+- Service worker caches the static shell and runtime modules
+- Manifest enables standalone installation
