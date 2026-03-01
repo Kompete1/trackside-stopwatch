@@ -56,7 +56,7 @@ function buildDriverCard(doc, driverIndex, compact = false, solo = false) {
   const name = createElement(doc, "span", {
     className: "driver-name",
     id: `${prefix}-label`,
-    text: `Driver ${driverIndex}`,
+    text: String.fromCharCode(64 + driverIndex),
   });
   const time = createElement(doc, "div", {
     className: "driver-time",
@@ -378,7 +378,7 @@ export function updateDataWindow(container, state, timeSource) {
     const compactMode = visibleDrivers === 4;
 
     if (nameEl) {
-      nameEl.textContent = compactMode ? driver.label : `Driver ${driver.label}`;
+      nameEl.textContent = driver.label;
     }
     if (lapEl) {
       if (compactMode) {

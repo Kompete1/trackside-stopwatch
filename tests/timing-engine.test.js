@@ -35,6 +35,14 @@ describe("timing engine", () => {
     expect(normalizeSettings({ gloveModeEnabled: true }).gloveModeEnabled).toBe(true);
   });
 
+  test("normalizes driver labels to uppercase and allows 10 characters", () => {
+    const settings = normalizeSettings({
+      driverLabels: [" racerkent1! ", "ab", "third", "fourth"],
+    });
+
+    expect(settings.driverLabels[0]).toBe("RACERKENT1");
+  });
+
   test("stop keeps elapsed time exact across repeated pauses", () => {
     const clock = createFakeTimeSource();
     const state = createState();

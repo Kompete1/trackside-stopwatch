@@ -1,4 +1,4 @@
-const APP_SHELL_VERSION = "2026-03-01-v1";
+const APP_SHELL_VERSION = "2026-03-01-v15";
 const CACHE_NAME = `trackside-stopwatch-runtime-${APP_SHELL_VERSION}`;
 const OFFLINE_NAVIGATION_FALLBACK = "./index.html";
 const PRECACHE_ASSETS = [

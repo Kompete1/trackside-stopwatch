@@ -12,7 +12,23 @@
 </head>
 <body>
     <div class="container">
-        <header id="mode-header" tabindex="0">1 Driver Mode</header>
+        <div class="top-bar">
+            <header id="mode-header" tabindex="0">1 Driver Mode</header>
+            <button
+                id="menu-btn"
+                class="gray menu-toggle"
+                type="button"
+                aria-label="Open menu"
+                aria-controls="menu-popup"
+                aria-expanded="false"
+            >
+                <span class="menu-toggle-lines" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+        </div>
         <div id="status-banner" class="status-banner" hidden></div>
 
         <section id="data-window" aria-live="off"></section>
@@ -29,19 +45,17 @@
 
             <button id="lap4" class="lap-btn blue inactive">L4</button>
             <button id="split4" class="split-btn green inactive">S4</button>
-
-            <button id="menu-btn" class="menu-btn gray">Menu</button>
-            <button id="ok-btn" class="ok-btn amber">Export</button>
         </div>
-    </div>
 
-    <div id="menu-popup" class="overlay" hidden>
-        <div class="sheet-menu" role="dialog" aria-modal="true" aria-label="Menu">
-            <button id="stop-timing">Stop Timing</button>
-            <button id="reset-timing">Reset Timing</button>
-            <button id="open-summary">Summary</button>
-            <button id="open-settings">Settings</button>
-            <button id="user-guide">Help</button>
+        <div id="menu-popup" class="overlay menu-overlay" hidden>
+            <div class="sheet-menu anchored-menu" role="dialog" aria-modal="true" aria-label="Menu">
+                <button id="stop-timing">Stop Timing</button>
+                <button id="reset-timing">Reset Timing</button>
+                <button id="open-summary">Summary</button>
+                <button id="ok-btn" type="button">Export CSV</button>
+                <button id="open-settings">Settings</button>
+                <button id="user-guide">Help</button>
+            </div>
         </div>
     </div>
 
@@ -100,19 +114,19 @@
             <div class="label-grid">
                 <label>
                     <span>Driver A Label</span>
-                    <input id="settings-driver-1" maxlength="4" type="text" inputmode="text" autocomplete="off">
+                    <input id="settings-driver-1" maxlength="10" type="text" inputmode="text" autocomplete="off">
                 </label>
                 <label>
                     <span>Driver B Label</span>
-                    <input id="settings-driver-2" maxlength="4" type="text" inputmode="text" autocomplete="off">
+                    <input id="settings-driver-2" maxlength="10" type="text" inputmode="text" autocomplete="off">
                 </label>
                 <label>
                     <span>Driver C Label</span>
-                    <input id="settings-driver-3" maxlength="4" type="text" inputmode="text" autocomplete="off">
+                    <input id="settings-driver-3" maxlength="10" type="text" inputmode="text" autocomplete="off">
                 </label>
                 <label>
                     <span>Driver D Label</span>
-                    <input id="settings-driver-4" maxlength="4" type="text" inputmode="text" autocomplete="off">
+                    <input id="settings-driver-4" maxlength="10" type="text" inputmode="text" autocomplete="off">
                 </label>
             </div>
 
@@ -137,7 +151,7 @@
                 </section>
                 <section class="guide-card">
                     <h2>Pause Safely</h2>
-                    <p>Use Menu and Stop Timing to pause every running driver without ending the current lap. Use the Lap button again to resume.</p>
+                    <p>Use the top-right menu and Stop Timing to pause every running driver without ending the current lap. Use the Lap button again to resume.</p>
                 </section>
                 <section class="guide-card">
                     <h2>Feedback Controls</h2>
@@ -145,7 +159,7 @@
                 </section>
                 <section class="guide-card">
                     <h2>Recover Sessions</h2>
-                    <p>The app saves timing locally. If the page reloads, you can restore the last session and continue where you left off. Use Export to download completed laps as CSV.</p>
+                    <p>The app saves timing locally. If the page reloads, you can restore the last session and continue where you left off. Open the top-right menu and choose Export CSV to download completed laps.</p>
                 </section>
             </div>
             <div class="modal-actions">
