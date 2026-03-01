@@ -26,6 +26,7 @@ This repo is a static PWA lap timer. Timing accuracy is the highest priority. An
 - Add new settings through `normalizeSettings()` and the settings modal wiring
 - Keep summary and export views derived from canonical timing state instead of storing duplicate aggregates
 - Keep glove mode as a UI-only setting; it must not alter timing behavior or shell sizing rules
+- Bump the service worker shell version when changing precached shell assets
 - Keep service worker asset lists in sync with any new runtime modules
 
 ## Verification Focus
