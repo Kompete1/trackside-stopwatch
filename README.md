@@ -9,6 +9,7 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 - Saves the current session in local storage and offers restore on reload
 - Exports completed laps to CSV
 - Supports optional haptics, sound feedback, and screen wake lock
+- Blocks manual mode switching while timing is actively running
 - Runs as a static web app and can be installed as a PWA
 
 ## Local Development
@@ -19,8 +20,9 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 
 ## Testing
 
-- Run unit tests with `npm test`
-- Run the Playwright smoke test with `npm run test:e2e`
+- Run unit tests with `npm test` (Vitest)
+- Run only the timing-engine suite with `npm run test:unit`
+- Run the Playwright browser flow suite with `npm run test:e2e`
 
 ## PWA Notes
 
@@ -40,5 +42,5 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 ## Known Limits
 
 - Store packaging for iOS/Android is not implemented yet
-- The Playwright test suite is a minimal smoke layer only
+- Browser-level flow coverage now covers key user journeys, but it is still lighter than the engine coverage
 - CSV export covers completed laps, not full event-log replay

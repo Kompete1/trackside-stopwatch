@@ -232,11 +232,21 @@ export function startApp(documentRef = document) {
     showStatus("CSV export downloaded.", "success");
   }
 
-  modeHeader.addEventListener("click", () => {
+  function tryCycleMode() {
+    if (hasAnyRunningDrivers(state)) {
+      showStatus("Pause timing before changing display mode.", "warning");
+      return false;
+    }
+
     feedback.playTap();
     state.mode = nextMode(state.mode);
     render();
     persistState();
+    return true;
+  }
+
+  modeHeader.addEventListener("click", () => {
+    tryCycleMode();
   });
 
   modeHeader.addEventListener("keydown", (event) => {
@@ -244,10 +254,7 @@ export function startApp(documentRef = document) {
       return;
     }
     event.preventDefault();
-    feedback.playTap();
-    state.mode = nextMode(state.mode);
-    render();
-    persistState();
+    tryCycleMode();
   });
 
   lapButtons.forEach((button, index) => {

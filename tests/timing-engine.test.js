@@ -1,7 +1,7 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { describe, expect, test } from "vitest";
 
 import {
+  buildExportRows,
   cloneStateForStorage,
   createInitialAppState,
   getDriverElapsedMs,
@@ -24,60 +24,197 @@ function createFakeTimeSource() {
   };
 }
 
-test("stop keeps elapsed time exact across pauses", () => {
-  const clock = createFakeTimeSource();
-  const state = createInitialAppState(normalizeSettings());
+function createState() {
+  return createInitialAppState(normalizeSettings());
+}
 
-  performAction(state, { type: "lapButton", driverId: 1 }, clock);
-  clock.advance(1500);
-  performAction(state, { type: "stopDriver", driverId: 1 }, clock);
+describe("timing engine", () => {
+  test("stop keeps elapsed time exact across repeated pauses", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
 
-  assert.equal(state.drivers[0].currentLapElapsedMs, 1500);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(1_500);
+    performAction(state, { type: "stopDriver", driverId: 1 }, clock);
 
-  clock.advance(400);
-  performAction(state, { type: "lapButton", driverId: 1 }, clock);
-  clock.advance(600);
-  performAction(state, { type: "stopDriver", driverId: 1 }, clock);
+    expect(state.drivers[0].currentLapElapsedMs).toBe(1_500);
 
-  assert.equal(state.drivers[0].currentLapElapsedMs, 2100);
-});
+    clock.advance(400);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(600);
+    performAction(state, { type: "stopDriver", driverId: 1 }, clock);
 
-test("sector splits track by split position", () => {
-  const clock = createFakeTimeSource();
-  const state = createInitialAppState(normalizeSettings());
+    expect(state.drivers[0].currentLapElapsedMs).toBe(2_100);
+    expect(state.drivers[0].status).toBe("paused");
+  });
 
-  performAction(state, { type: "lapButton", driverId: 1 }, clock);
-  clock.advance(10_000);
-  performAction(state, { type: "splitButton", driverId: 1 }, clock);
-  clock.advance(5_000);
-  performAction(state, { type: "splitButton", driverId: 1 }, clock);
+  test("single-driver flow records laps, splits, and reset events", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
 
-  assert.equal(state.drivers[0].lastSplitMs, 5_000);
-  assert.equal(state.drivers[0].bestSplitsMs[0], 10_000);
-  assert.equal(state.drivers[0].bestSplitsMs[1], 5_000);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(4_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+    clock.advance(3_000);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
 
-  clock.advance(7_000);
-  performAction(state, { type: "lapButton", driverId: 1 }, clock);
-  clock.advance(9_000);
-  performAction(state, { type: "splitButton", driverId: 1 }, clock);
+    expect(state.drivers[0].lastLapMs).toBe(7_000);
+    expect(state.drivers[0].lapHistory).toHaveLength(1);
+    expect(state.drivers[0].lapHistory[0].splitsMs).toEqual([4_000]);
+    expect(state.eventLog.map((entry) => entry.type)).toEqual(["start", "split", "lap"]);
 
-  assert.equal(state.drivers[0].bestSplitsMs[0], 9_000);
-  assert.equal(state.drivers[0].bestSplitsMs[1], 5_000);
-});
+    performAction(state, { type: "resetAll" }, clock);
 
-test("running sessions restore with elapsed time intact", () => {
-  const clock = createFakeTimeSource();
-  const state = createInitialAppState(normalizeSettings());
+    expect(state.drivers[0].status).toBe("idle");
+    expect(state.drivers[0].lapHistory).toHaveLength(0);
+    expect(state.eventLog).toHaveLength(1);
+    expect(state.eventLog[0].type).toBe("reset");
+    expect(state.nextEventId).toBe(2);
+  });
 
-  performAction(state, { type: "lapButton", driverId: 1 }, clock);
-  clock.advance(800);
+  test("two drivers run independently and stop-all pauses both without losing elapsed time", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
 
-  const snapshot = cloneStateForStorage(state);
-  clock.advance(500);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(1_200);
+    performAction(state, { type: "lapButton", driverId: 2 }, clock);
+    clock.advance(800);
+    performAction(state, { type: "stopAll" }, clock);
 
-  const restored = restoreAppState(snapshot, normalizeSettings(), clock);
-  const elapsed = getDriverElapsedMs(restored.drivers[0], clock);
+    expect(state.drivers[0].status).toBe("paused");
+    expect(state.drivers[1].status).toBe("paused");
+    expect(state.drivers[0].currentLapElapsedMs).toBe(2_000);
+    expect(state.drivers[1].currentLapElapsedMs).toBe(800);
 
-  assert.equal(elapsed, 1300);
-  assert.equal(restored.drivers[0].status, "running");
+    clock.advance(600);
+    expect(getDriverElapsedMs(state.drivers[0], clock)).toBe(2_000);
+    expect(getDriverElapsedMs(state.drivers[1], clock)).toBe(800);
+  });
+
+  test("four drivers keep separate state through mixed actions", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    for (let driverId = 1; driverId <= 4; driverId += 1) {
+      performAction(state, { type: "lapButton", driverId }, clock);
+      clock.advance(250);
+    }
+
+    clock.advance(750);
+    performAction(state, { type: "splitButton", driverId: 3 }, clock);
+    clock.advance(500);
+    performAction(state, { type: "lapButton", driverId: 4 }, clock);
+    performAction(state, { type: "stopDriver", driverId: 2 }, clock);
+
+    expect(state.drivers[0].status).toBe("running");
+    expect(state.drivers[1].status).toBe("paused");
+    expect(state.drivers[2].lastSplitPosition).toBe(1);
+    expect(state.drivers[2].lastSplitMs).toBe(1_250);
+    expect(state.drivers[3].lapHistory).toHaveLength(1);
+    expect(state.drivers[3].lapIndex).toBe(2);
+  });
+
+  test("mode changes do not alter active elapsed time", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(1_750);
+
+    performAction(state, { type: "setMode", mode: 2 }, clock);
+    performAction(state, { type: "setMode", mode: 4 }, clock);
+
+    expect(state.mode).toBe(4);
+    expect(getDriverElapsedMs(state.drivers[0], clock)).toBe(1_750);
+    expect(state.drivers[0].status).toBe("running");
+  });
+
+  test("sector splits track by split position only", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(10_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+    clock.advance(5_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+
+    expect(state.drivers[0].lastSplitMs).toBe(5_000);
+    expect(state.drivers[0].bestSplitsMs[0]).toBe(10_000);
+    expect(state.drivers[0].bestSplitsMs[1]).toBe(5_000);
+
+    clock.advance(7_000);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(9_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+
+    expect(state.drivers[0].bestSplitsMs[0]).toBe(9_000);
+    expect(state.drivers[0].bestSplitsMs[1]).toBe(5_000);
+  });
+
+  test("running sessions restore with elapsed time intact", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(800);
+
+    const snapshot = cloneStateForStorage(state);
+    clock.advance(500);
+
+    const restored = restoreAppState(snapshot, normalizeSettings(), clock);
+    const elapsed = getDriverElapsedMs(restored.drivers[0], clock);
+
+    expect(elapsed).toBe(1_300);
+    expect(restored.drivers[0].status).toBe("running");
+  });
+
+  test("paused sessions restore without resuming the clock", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(900);
+    performAction(state, { type: "stopDriver", driverId: 1 }, clock);
+
+    const snapshot = cloneStateForStorage(state);
+    clock.advance(1_200);
+
+    const restored = restoreAppState(snapshot, normalizeSettings(), clock);
+
+    expect(restored.drivers[0].status).toBe("paused");
+    expect(getDriverElapsedMs(restored.drivers[0], clock)).toBe(900);
+  });
+
+  test("export rows preserve lap ordering and mixed split counts", () => {
+    const clock = createFakeTimeSource();
+    const state = createState();
+
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+    clock.advance(3_000);
+    performAction(state, { type: "splitButton", driverId: 1 }, clock);
+    clock.advance(2_000);
+    performAction(state, { type: "lapButton", driverId: 1 }, clock);
+
+    performAction(state, { type: "lapButton", driverId: 2 }, clock);
+    clock.advance(4_000);
+    performAction(state, { type: "lapButton", driverId: 2 }, clock);
+
+    const rows = buildExportRows(state);
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      driverId: 1,
+      lapIndex: 1,
+      lapMs: 5_000,
+      splitsMs: [3_000],
+    });
+    expect(rows[1]).toMatchObject({
+      driverId: 2,
+      lapIndex: 1,
+      lapMs: 4_000,
+      splitsMs: [],
+    });
+  });
 });

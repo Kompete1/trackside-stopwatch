@@ -11,6 +11,9 @@ One marshal using one phone at trackside.
 - Pressing a Lap button on a paused driver resumes the current lap
 - Stop Timing pauses active laps without completing them
 - Reset clears all drivers, laps, splits, and event history after confirmation
+- The mode header does not allow manual mode changes while any driver is actively running
+- Once all drivers are paused or idle, the mode header can cycle layouts again
+- Starting Driver 2, 3, or 4 still auto-promotes the display when needed so the active driver stays visible
 
 ## Split Rules
 

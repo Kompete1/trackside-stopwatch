@@ -29,6 +29,12 @@
 - Save on a background heartbeat while timing is active
 - Save on visibility changes and before unload
 
+## Testing Seams
+
+- `src/timing-engine.js` is the primary unit-test seam and is exercised with fake clocks in Vitest
+- `src/app-controller.js` and `src/ui-render.js` are covered by Playwright flow tests for key user journeys and mobile shell behavior
+- Timing and export regressions should be proven in engine tests before UI-heavy changes land
+
 ## PWA Strategy
 
 - Module entrypoint runs as a standard web app
