@@ -29,6 +29,12 @@
 - Save on a background heartbeat while timing is active
 - Save on visibility changes and before unload
 
+## Derived Views
+
+- Session summary is derived from `lapHistory`, `bestLapMs`, `lastLapMs`, and `bestSplitsMs`
+- Summary data is not persisted separately and should always be recomputed from canonical state
+- `buildSessionSummary()` in `src/timing-engine.js` is the source for summary aggregation
+
 ## Testing Seams
 
 - `src/timing-engine.js` is the primary unit-test seam and is exercised with fake clocks in Vitest

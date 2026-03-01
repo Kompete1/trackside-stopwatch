@@ -84,6 +84,26 @@ test.describe("trackside stopwatch flows", () => {
     await expect(page.locator("#status-banner")).toContainText("No completed laps to export yet.");
   });
 
+  test("shows a session summary with lap aggregates", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator("#lap1").click();
+    await page.waitForTimeout(120);
+    await page.locator("#split1").click();
+    await page.waitForTimeout(120);
+    await page.locator("#lap1").click();
+
+    await page.locator("#menu-btn").click();
+    await page.locator("#open-summary").click();
+
+    await expect(page.locator("#summary-popup")).toBeVisible();
+    await expect(page.locator("#summary-content")).toContainText("1 completed lap");
+    await expect(page.locator("#summary-driver-1")).toContainText("Driver A");
+    await expect(page.locator("#summary-driver-1")).toContainText("1 lap");
+    await expect(page.locator("#summary-driver-1")).toContainText("Best Lap");
+    await expect(page.locator("#summary-driver-1")).toContainText("Best Splits");
+  });
+
   test("blocks mode switching while timing is active", async ({ page }) => {
     await page.goto("/");
 

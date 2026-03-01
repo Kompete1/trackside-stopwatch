@@ -24,6 +24,7 @@ This repo is a static PWA lap timer. Timing accuracy is the highest priority. An
 
 - Add new timing behavior through `performAction()` and the driver state model
 - Add new settings through `normalizeSettings()` and the settings modal wiring
+- Keep summary and export views derived from canonical timing state instead of storing duplicate aggregates
 - Keep service worker asset lists in sync with any new runtime modules
 
 ## Verification Focus

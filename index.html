@@ -39,8 +39,19 @@
         <div class="sheet-menu" role="dialog" aria-modal="true" aria-label="Menu">
             <button id="stop-timing">Stop Timing</button>
             <button id="reset-timing">Reset Timing</button>
+            <button id="open-summary">Summary</button>
             <button id="open-settings">Settings</button>
             <button id="user-guide">Help</button>
+        </div>
+    </div>
+
+    <div id="summary-popup" class="overlay" hidden>
+        <div class="modal-window summary-window" role="dialog" aria-modal="true" aria-label="Session summary">
+            <div class="modal-title">Session Summary</div>
+            <div id="summary-content" class="summary-content"></div>
+            <div class="modal-actions">
+                <button id="close-summary" class="amber">Close</button>
+            </div>
         </div>
     </div>
 

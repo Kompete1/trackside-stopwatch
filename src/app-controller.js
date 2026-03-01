@@ -2,6 +2,7 @@ import { createFeedbackAdapter } from "./feedback.js";
 import { localStorageAdapter } from "./store.js";
 import {
   applySettingsToState,
+  buildSessionSummary,
   buildExportRows,
   createInitialAppState,
   createSystemTimeSource,
@@ -15,6 +16,7 @@ import {
   populateSettingsForm,
   readSettingsForm,
   renderDataWindow,
+  renderSessionSummary,
   setModeHeader,
   updateButtonStates,
   updateDataWindow,
@@ -108,6 +110,7 @@ export function startApp(documentRef = document) {
   const dataWindow = documentRef.getElementById("data-window");
   const menuPopup = documentRef.getElementById("menu-popup");
   const settingsPopup = documentRef.getElementById("settings-popup");
+  const summaryPopup = documentRef.getElementById("summary-popup");
   const userGuidePopup = documentRef.getElementById("user-guide-popup");
   const clickSound = documentRef.getElementById("click-sound");
 
@@ -119,8 +122,14 @@ export function startApp(documentRef = document) {
   const menuActions = {
     stopTiming: documentRef.getElementById("stop-timing"),
     resetTiming: documentRef.getElementById("reset-timing"),
+    summary: documentRef.getElementById("open-summary"),
     settings: documentRef.getElementById("open-settings"),
     userGuide: documentRef.getElementById("user-guide"),
+  };
+
+  const summaryElements = {
+    content: documentRef.getElementById("summary-content"),
+    close: documentRef.getElementById("close-summary"),
   };
 
   const settingsForm = {
@@ -232,6 +241,13 @@ export function startApp(documentRef = document) {
     showStatus("CSV export downloaded.", "success");
   }
 
+  function openSummary() {
+    const summary = buildSessionSummary(state);
+    renderSessionSummary(summaryElements.content, summary);
+    closeOverlay(menuPopup);
+    openOverlay(summaryPopup);
+  }
+
   function tryCycleMode() {
     if (hasAnyRunningDrivers(state)) {
       showStatus("Pause timing before changing display mode.", "warning");
@@ -313,6 +329,12 @@ export function startApp(documentRef = document) {
     }
   });
 
+  summaryPopup.addEventListener("click", (event) => {
+    if (event.target === summaryPopup) {
+      closeOverlay(summaryPopup);
+    }
+  });
+
   userGuidePopup.addEventListener("click", (event) => {
     if (event.target === userGuidePopup) {
       closeOverlay(userGuidePopup);
@@ -345,6 +367,11 @@ export function startApp(documentRef = document) {
     populateSettingsForm(settingsForm, settings);
     closeOverlay(menuPopup);
     openOverlay(settingsPopup);
+  });
+
+  menuActions.summary.addEventListener("click", () => {
+    feedback.playTap();
+    openSummary();
   });
 
   menuActions.userGuide.addEventListener("click", () => {
@@ -380,6 +407,11 @@ export function startApp(documentRef = document) {
   guideClose.addEventListener("click", () => {
     feedback.playTap();
     closeOverlay(userGuidePopup);
+  });
+
+  summaryElements.close.addEventListener("click", () => {
+    feedback.playTap();
+    closeOverlay(summaryPopup);
   });
 
   documentRef.addEventListener("visibilitychange", () => {
