@@ -37,7 +37,7 @@ Trackside Stopwatch is a PWA-first lap timer built for one marshal using one pho
 - `app.js`: module bootstrap and service worker registration
 - `src/timing-engine.js`: canonical timer state and timing actions
 - `src/app-controller.js`: DOM wiring, persistence, settings, export, feedback hooks
-- `src/ui-render.js`: layout rendering and display formatting
+- `src/ui-render.js`: DOM-safe layout rendering and display formatting
 - `src/store.js`: local storage adapter
 - `src/feedback.js`: sound, haptics, and wake lock behavior
 

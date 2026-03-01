@@ -1,81 +1,138 @@
 import { getDriverElapsedMs, getVisibleDriverCount } from "./timing-engine.js";
 
-function buildDriverCard(driverIndex, compact = false, solo = false) {
-  const prefix = `d${driverIndex}`;
-  const classes = ["driver-card"];
-  if (compact) {
-    classes.push("compact");
+function createElement(doc, tagName, { className = "", id = "", text = "" } = {}) {
+  const element = doc.createElement(tagName);
+  if (className) {
+    element.className = className;
   }
-  if (solo) {
-    classes.push("solo");
+  if (id) {
+    element.id = id;
+  }
+  if (text) {
+    element.textContent = text;
+  }
+  return element;
+}
+
+function createMetricTile(doc, { label, labelId = "", valueId, valueText, valueClass = "", tileClass = "", subId = "", subText = "", subClass = "" }) {
+  const tile = createElement(doc, "div", {
+    className: tileClass ? `metric-tile ${tileClass}` : "metric-tile",
+  });
+  const main = createElement(doc, "div", { className: "metric-main" });
+  const labelEl = createElement(doc, "span", {
+    className: "metric-label",
+    id: labelId,
+    text: label,
+  });
+  const valueEl = createElement(doc, "span", {
+    className: valueClass ? `metric-value ${valueClass}` : "metric-value",
+    id: valueId,
+    text: valueText,
+  });
+
+  main.append(labelEl, valueEl);
+  tile.appendChild(main);
+
+  if (subId || subText) {
+    const subEl = createElement(doc, "span", {
+      className: subClass ? `metric-sub ${subClass}` : "metric-sub",
+      id: subId,
+      text: subText,
+    });
+    tile.appendChild(subEl);
   }
 
-  return `
-    <section class="${classes.join(" ")}" id="driver-card-${driverIndex}">
-      <div class="driver-card-head">
-        <span class="driver-name" id="${prefix}-label">Driver ${driverIndex}</span>
-        <div class="driver-time" id="${prefix}-time">00:00.00</div>
-        <span class="driver-lap" id="${prefix}-lap">Lap #1</span>
-      </div>
-      <div class="metric-grid">
-        <div class="metric-tile">
-          <div class="metric-main">
-            <span class="metric-label">Last</span>
-            <span class="metric-value" id="${prefix}-last">--:--.--</span>
-          </div>
-        </div>
-        <div class="metric-tile">
-          <div class="metric-main">
-            <span class="metric-label">Diff</span>
-            <span class="metric-value" id="${prefix}-diff">+00.00</span>
-          </div>
-        </div>
-        <div class="metric-tile">
-          <div class="metric-main">
-            <span class="metric-label">Best</span>
-            <span class="metric-value best-lap-value" id="${prefix}-best">--:--.--</span>
-          </div>
-        </div>
-        <div class="metric-tile metric-split-tile">
-          <div class="metric-main">
-            <span class="metric-label" id="${prefix}-split-label">Split 0</span>
-            <span class="metric-value" id="${prefix}-split">--.--</span>
-          </div>
-          <span class="metric-sub best-split-value" id="${prefix}-best-split">Best --.--</span>
-        </div>
-      </div>
-    </section>
-  `;
+  return tile;
+}
+
+function buildDriverCard(doc, driverIndex, compact = false, solo = false) {
+  const prefix = `d${driverIndex}`;
+  const card = createElement(doc, "section", {
+    className: `driver-card${compact ? " compact" : ""}${solo ? " solo" : ""}`,
+    id: `driver-card-${driverIndex}`,
+  });
+
+  const head = createElement(doc, "div", { className: "driver-card-head" });
+  const name = createElement(doc, "span", {
+    className: "driver-name",
+    id: `${prefix}-label`,
+    text: `Driver ${driverIndex}`,
+  });
+  const time = createElement(doc, "div", {
+    className: "driver-time",
+    id: `${prefix}-time`,
+    text: "00:00.00",
+  });
+  const lap = createElement(doc, "span", {
+    className: "driver-lap",
+    id: `${prefix}-lap`,
+    text: "Lap #1",
+  });
+
+  head.append(name, time, lap);
+
+  const metricGrid = createElement(doc, "div", { className: "metric-grid" });
+  metricGrid.append(
+    createMetricTile(doc, {
+      label: "Last",
+      valueId: `${prefix}-last`,
+      valueText: "--:--.--",
+    }),
+    createMetricTile(doc, {
+      label: "Diff",
+      valueId: `${prefix}-diff`,
+      valueText: "+00.00",
+    }),
+    createMetricTile(doc, {
+      label: "Best",
+      valueId: `${prefix}-best`,
+      valueText: "--:--.--",
+      valueClass: "best-lap-value",
+    }),
+    createMetricTile(doc, {
+      label: "Split 0",
+      labelId: `${prefix}-split-label`,
+      valueId: `${prefix}-split`,
+      valueText: "--.--",
+      tileClass: "metric-split-tile",
+      subId: `${prefix}-best-split`,
+      subText: "Best --.--",
+      subClass: "best-split-value",
+    })
+  );
+
+  card.append(head, metricGrid);
+  return card;
 }
 
 export function renderDataWindow(container, mode) {
+  const doc = container.ownerDocument;
   const visibleDrivers = getVisibleDriverCount(mode);
   container.classList.remove("mode-1", "mode-2", "mode-4");
   container.classList.add(`mode-${visibleDrivers}`);
 
   if (visibleDrivers === 1) {
-    container.innerHTML = `<div class="driver-stack solo-stack">${buildDriverCard(1, false, true)}</div>`;
+    const stack = createElement(doc, "div", { className: "driver-stack solo-stack" });
+    stack.appendChild(buildDriverCard(doc, 1, false, true));
+    container.replaceChildren(stack);
     return;
   }
 
   if (visibleDrivers === 2) {
-    container.innerHTML = `
-      <div class="driver-stack dual-stack">
-        ${buildDriverCard(1)}
-        ${buildDriverCard(2)}
-      </div>
-    `;
+    const stack = createElement(doc, "div", { className: "driver-stack dual-stack" });
+    stack.append(buildDriverCard(doc, 1), buildDriverCard(doc, 2));
+    container.replaceChildren(stack);
     return;
   }
 
-  container.innerHTML = `
-    <div class="driver-grid four-up">
-      ${buildDriverCard(1, true)}
-      ${buildDriverCard(2, true)}
-      ${buildDriverCard(3, true)}
-      ${buildDriverCard(4, true)}
-    </div>
-  `;
+  const grid = createElement(doc, "div", { className: "driver-grid four-up" });
+  grid.append(
+    buildDriverCard(doc, 1, true),
+    buildDriverCard(doc, 2, true),
+    buildDriverCard(doc, 3, true),
+    buildDriverCard(doc, 4, true)
+  );
+  container.replaceChildren(grid);
 }
 
 export function formatClock(ms) {
@@ -203,38 +260,58 @@ function formatBestSplitSummary(bestSplitsMs) {
 }
 
 export function renderSessionSummary(container, summary) {
+  const doc = container.ownerDocument;
   const totalLabel = summary.totalCompletedLaps === 1 ? "1 completed lap" : `${summary.totalCompletedLaps} completed laps`;
-  const cardsMarkup = summary.drivers
-    .map(
-      (driver) => `
-        <section class="summary-card" id="summary-driver-${driver.driverId}">
-          <div class="summary-card-head">
-            <span class="summary-driver-name">Driver ${driver.label}</span>
-            <span class="summary-lap-count">${driver.completedLaps} lap${driver.completedLaps === 1 ? "" : "s"}</span>
-          </div>
-          <div class="summary-metrics">
-            <div class="summary-metric-row">
-              <span class="summary-label">Best Lap</span>
-              <span class="summary-value">${formatClock(driver.bestLapMs)}</span>
-            </div>
-            <div class="summary-metric-row">
-              <span class="summary-label">Last Lap</span>
-              <span class="summary-value">${formatClock(driver.lastLapMs)}</span>
-            </div>
-          </div>
-          <div class="summary-splits">
-            <span class="summary-label">Best Splits</span>
-            <span class="summary-split-list">${formatBestSplitSummary(driver.bestSplitsMs)}</span>
-          </div>
-        </section>
-      `
-    )
-    .join("");
+  const topline = createElement(doc, "div", {
+    className: "summary-topline",
+    text: totalLabel,
+  });
+  const grid = createElement(doc, "div", { className: "summary-grid" });
 
-  container.innerHTML = `
-    <div class="summary-topline">${totalLabel}</div>
-    <div class="summary-grid">${cardsMarkup}</div>
-  `;
+  summary.drivers.forEach((driver) => {
+    const card = createElement(doc, "section", {
+      className: "summary-card",
+      id: `summary-driver-${driver.driverId}`,
+    });
+    const head = createElement(doc, "div", { className: "summary-card-head" });
+    head.append(
+      createElement(doc, "span", {
+        className: "summary-driver-name",
+        text: `Driver ${driver.label}`,
+      }),
+      createElement(doc, "span", {
+        className: "summary-lap-count",
+        text: `${driver.completedLaps} lap${driver.completedLaps === 1 ? "" : "s"}`,
+      })
+    );
+
+    const metrics = createElement(doc, "div", { className: "summary-metrics" });
+    [
+      ["Best Lap", formatClock(driver.bestLapMs)],
+      ["Last Lap", formatClock(driver.lastLapMs)],
+    ].forEach(([label, value]) => {
+      const row = createElement(doc, "div", { className: "summary-metric-row" });
+      row.append(
+        createElement(doc, "span", { className: "summary-label", text: label }),
+        createElement(doc, "span", { className: "summary-value", text: value })
+      );
+      metrics.appendChild(row);
+    });
+
+    const splits = createElement(doc, "div", { className: "summary-splits" });
+    splits.append(
+      createElement(doc, "span", { className: "summary-label", text: "Best Splits" }),
+      createElement(doc, "span", {
+        className: "summary-split-list",
+        text: formatBestSplitSummary(driver.bestSplitsMs),
+      })
+    );
+
+    card.append(head, metrics, splits);
+    grid.appendChild(card);
+  });
+
+  container.replaceChildren(topline, grid);
 }
 
 export function updateDataWindow(container, state, timeSource) {
